@@ -1,0 +1,3561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>亲密偏好探索指南</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&display=swap');
+:root {
+  --bg-deep: #17101f;
+  --bg-main: #17101f;
+  --bg-card: linear-gradient(145deg, rgba(55,35,68,.78), rgba(30,20,40,.82));
+  --bg-card-hover: linear-gradient(145deg, rgba(68,34,72,.90), rgba(33,18,43,.90));
+  --bg-input: rgba(18,8,23,.48);
+  --purple-deep: #2a1a35;
+  --purple-mid: #6B3E73;
+  --purple-light: #A36CA8;
+  --purple-glow: rgba(91,46,99,.20);
+  --pink-main: #DDB1DA;
+  --pink-soft: #DDB1DA;
+  --pink-glow: rgba(163,108,168,.15);
+  --warm-gray: #A36CA8;
+  --text-primary: #F5ECF7;
+  --text-secondary: rgba(245,236,247,.70);
+  --text-dim: rgba(245,236,247,.50);
+  --border: rgba(221,177,218,.28);
+  --border-focus: rgba(221,177,218,.52);
+  --gradient-accent: linear-gradient(135deg, #8D4D78, #5B2E63);
+  --gradient-card: linear-gradient(145deg, rgba(55,35,68,.78), rgba(30,20,40,.82));
+  --shadow-soft: 0 14px 40px rgba(0,0,0,.28);
+  --shadow-glow: 0 10px 28px rgba(91,46,99,.24);
+  --radius-lg: 20px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
+  --radius-xs: 6px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background:
+    radial-gradient(900px 620px at 50% -20%, rgba(91,46,99,.20), transparent 65%),
+    radial-gradient(520px 420px at 100% 80%, rgba(163,108,168,.08), transparent 70%),
+    #17101f;
+  color: var(--text-primary);
+  font-family: 'Noto Serif SC', -apple-system, 'PingFang SC', 'Hiragino Sans GB', system-ui, serif;
+  min-height: 100vh;
+  font-size: 15px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Background ambient effects */
+.ambient {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.ambient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.15;
+  animation: drift 20s ease-in-out infinite;
+}
+
+.ambient-orb:nth-child(1) {
+  width: 400px; height: 400px;
+  background: #6b3fa0;
+  top: -100px; left: -100px;
+  animation-delay: 0s;
+}
+
+.ambient-orb:nth-child(2) {
+  width: 350px; height: 350px;
+  background: #e8729a;
+  top: 40%; right: -150px;
+  animation-delay: -7s;
+  animation-duration: 25s;
+}
+
+.ambient-orb:nth-child(3) {
+  width: 300px; height: 300px;
+  background: #a884e8;
+  bottom: -50px; left: 30%;
+  animation-delay: -14s;
+  animation-duration: 22s;
+}
+
+@keyframes drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -20px) scale(1.05); }
+  66% { transform: translate(-20px, 15px) scale(0.95); }
+}
+
+/* Progress bar */
+.progress-bar-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: rgba(14, 5, 21, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 0;
+  transition: var(--transition);
+}
+
+.progress-bar-track {
+  height: 3px;
+  background: rgba(255,255,255,0.06);
+  position: relative;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--gradient-accent);
+  border-radius: 0 3px 3px 0;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.progress-bar-fill::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: -2px;
+  width: 8px;
+  height: 8px;
+  background: var(--pink-soft);
+  border-radius: 50%;
+  box-shadow: 0 0 12px var(--pink-main);
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 16px 8px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.progress-info .section-name {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+/* Main container */
+.container {
+  position: relative;
+  z-index: 1;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 0 16px 100px;
+}
+
+/* Landing / User select screen */
+.screen {
+  display: none;
+  animation: fadeSlideIn 0.5s ease forwards;
+}
+
+.screen.active {
+  display: block;
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeSlideOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-20px); }
+}
+
+/* Landing page */
+.landing {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 40px 24px;
+}
+
+.landing-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--gradient-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 32px;
+  box-shadow: 0 0 30px rgba(91,46,99,.25), 0 0 60px rgba(163,108,168,.12);
+  animation: pulse 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 30px rgba(91,46,99,.25), 0 0 60px rgba(163,108,168,.12); }
+  50% { box-shadow: 0 0 40px rgba(91,46,99,.30), 0 0 70px rgba(163,108,168,.15); }
+}
+
+.landing-icon svg {
+  width: 36px;
+  height: 36px;
+  fill: white;
+}
+
+.landing h1 {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, #f0e8f8, #e8729a);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  line-height: 1.4;
+}
+
+.landing-quote {
+  max-width: 380px;
+  margin-bottom: 40px;
+  padding: 20px 24px;
+  background: linear-gradient(145deg, rgba(55,35,68,.78), rgba(30,20,40,.82));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.landing-quote p {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  line-height: 1.85;
+  text-align: left;
+}
+
+.landing-quote p + p {
+  margin-top: 12px;
+}
+
+.user-select-title {
+  font-size: 15px;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+
+.user-buttons {
+  display: flex;
+  gap: 16px;
+}
+
+.user-btn {
+  padding: 16px 36px;
+  border-radius: var(--radius-lg);
+  border: 1.5px solid rgba(221,177,218,.26);
+  background: linear-gradient(145deg, rgba(51,27,63,.84), rgba(24,12,31,.86));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--text-primary);
+  font-size: 17px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.user-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-accent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.user-btn:hover::before, .user-btn:active::before {
+  opacity: 0.15;
+}
+
+.user-btn:hover {
+  border-color: var(--purple-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
+}
+
+.user-btn:active {
+  transform: scale(0.97);
+}
+
+.user-btn .label {
+  position: relative;
+  z-index: 1;
+}
+
+.user-btn .sub {
+  display: block;
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 4px;
+  font-weight: 400;
+  position: relative;
+  z-index: 1;
+}
+
+.landing-status {
+  margin-top: 24px;
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+.landing-status .done {
+  color: var(--purple-light);
+}
+
+.landing-compare-btn {
+  margin-top: 24px;
+  padding: 14px 32px;
+  border-radius: var(--radius-lg);
+  border: 1.5px solid rgba(232,114,154,0.4);
+  background: linear-gradient(135deg, rgba(168,132,232,0.15), rgba(232,114,154,0.15));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--pink-soft);
+  font-size: 15px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: none;
+}
+
+.landing-compare-btn:hover {
+  background: linear-gradient(135deg, rgba(168,132,232,0.25), rgba(232,114,154,0.25));
+  transform: translateY(-2px);
+  box-shadow: 0 0 30px var(--pink-glow);
+}
+
+/* Questionnaire screen */
+.q-header {
+  padding: 60px 0 20px;
+  text-align: center;
+}
+
+.q-header .user-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: var(--gradient-accent);
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 12px;
+}
+
+.q-header h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.q-header .switch-user {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-dim);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: inherit;
+  text-decoration: underline;
+  text-decoration-color: rgba(122,107,143,0.4);
+}
+
+/* Section navigation */
+.section-nav {
+  position: sticky;
+  top: 42px;
+  z-index: 50;
+  background: rgba(14, 5, 21, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  margin: 0 -16px;
+  padding: 10px 16px;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.section-nav::-webkit-scrollbar { display: none; }
+
+.nav-pill {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+  position: relative;
+}
+
+.nav-pill.active {
+  background: linear-gradient(135deg, rgba(168,132,232,0.3), rgba(232,114,154,0.2));
+  border-color: rgba(168,132,232,0.4);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.nav-pill.completed::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 6px;
+  height: 6px;
+  background: var(--pink-main);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--pink-main);
+}
+
+/* Section content */
+.section-panel {
+  display: none;
+  animation: fadeSlideIn 0.4s ease forwards;
+}
+
+.section-panel.active {
+  display: block;
+}
+
+.section-intro {
+  margin: 20px 0;
+  padding: 16px 20px;
+  background: var(--gradient-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  line-height: 1.8;
+  font-style: italic;
+}
+
+/* Question cards */
+.q-card {
+  margin-bottom: 16px;
+  padding: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: var(--transition);
+  position: relative;
+}
+
+.q-card:hover {
+  background: var(--bg-card-hover);
+}
+
+.q-card.answered {
+  border-color: rgba(168,132,232,0.25);
+}
+
+.q-card.answered::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--gradient-accent);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.q-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(168,132,232,0.2);
+  color: var(--purple-light);
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.q-text {
+  font-size: 14.5px;
+  color: var(--text-primary);
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+
+.q-sub-label {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+  margin-top: 12px;
+}
+
+/* Text input */
+.text-input {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.6;
+  outline: none;
+  resize: vertical;
+  min-height: 44px;
+  transition: var(--transition);
+}
+
+.text-input:focus {
+  border-color: var(--border-focus);
+  background: rgba(255,255,255,0.09);
+  box-shadow: 0 0 20px rgba(168,132,232,0.1);
+}
+
+.text-input::placeholder {
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+textarea.text-input {
+  min-height: 80px;
+}
+
+/* Rating scale 1-5 */
+.rating-scale {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.rating-dot {
+  flex: 1;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+  border: 1.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: inherit;
+}
+
+.rating-dot.selected {
+  background: linear-gradient(135deg, rgba(168,132,232,0.35), rgba(232,114,154,0.25));
+  border-color: var(--purple-light);
+  color: var(--text-primary);
+  box-shadow: 0 0 15px var(--purple-glow);
+}
+
+.rating-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+/* Checkbox group */
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.checkbox-item:active {
+  transform: scale(0.98);
+}
+
+.checkbox-item.checked {
+  background: linear-gradient(135deg, rgba(168,132,232,0.18), rgba(232,114,154,0.1));
+  border-color: rgba(168,132,232,0.35);
+}
+
+.cb-box {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 1.5px solid var(--border);
+  background: rgba(255,255,255,0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  margin-top: 1px;
+}
+
+.checkbox-item.checked .cb-box {
+  background: var(--gradient-accent);
+  border-color: transparent;
+}
+
+.cb-box svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: white;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: var(--transition);
+}
+
+.checkbox-item.checked .cb-box svg {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.cb-text {
+  flex: 1;
+  font-size: 13.5px;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+/* Checkbox with intensity rating */
+.cb-intensity {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.cb-intensity-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.04);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.cb-intensity-dot.active {
+  background: var(--gradient-accent);
+  border-color: transparent;
+  color: white;
+}
+
+.cb-intensity-label {
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-left: 4px;
+}
+
+/* Toggle buttons (fantasy section) */
+.toggle-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.toggle-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+}
+
+.toggle-label {
+  flex: 1;
+  font-size: 13.5px;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+.toggle-options {
+  display: flex;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.toggle-opt {
+  padding: 5px 8px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  font-size: 10px;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.toggle-opt.want { }
+.toggle-opt.curious { }
+.toggle-opt.meh { }
+.toggle-opt.no { }
+
+.toggle-opt.selected.want {
+  background: linear-gradient(135deg, rgba(232,114,154,0.35), rgba(168,132,232,0.2));
+  border-color: var(--pink-main);
+  color: var(--pink-soft);
+}
+
+.toggle-opt.selected.curious {
+  background: linear-gradient(135deg, rgba(168,132,232,0.3), rgba(100,160,232,0.15));
+  border-color: var(--purple-light);
+  color: var(--purple-light);
+}
+
+.toggle-opt.selected.meh {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.2);
+  color: var(--text-secondary);
+}
+
+.toggle-opt.selected.no {
+  background: rgba(100,70,90,0.3);
+  border-color: rgba(150,100,120,0.4);
+  color: #c09aaa;
+}
+
+/* Drag to rank */
+.rank-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  counter-reset: rank;
+}
+
+.rank-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: grab;
+  transition: var(--transition);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.rank-item:active {
+  cursor: grabbing;
+}
+
+.rank-item.dragging {
+  opacity: 0.7;
+  transform: scale(1.02);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+  z-index: 10;
+  background: linear-gradient(135deg, rgba(168,132,232,0.2), rgba(232,114,154,0.15));
+  border-color: var(--purple-light);
+}
+
+.rank-item.drag-over {
+  border-color: var(--pink-main);
+  background: linear-gradient(135deg, rgba(232,114,154,0.1), rgba(168,132,232,0.05));
+}
+
+.rank-handle {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
+  color: var(--text-dim);
+}
+
+.rank-handle span {
+  display: block;
+  width: 14px;
+  height: 2px;
+  background: var(--text-dim);
+  border-radius: 1px;
+}
+
+.rank-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(168,132,232,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--purple-light);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.rank-text {
+  flex: 1;
+  font-size: 13.5px;
+  color: var(--text-primary);
+}
+
+/* Section navigation buttons */
+.section-footer {
+  display: flex;
+  gap: 12px;
+  margin-top: 32px;
+  padding-bottom: 20px;
+}
+
+.nav-btn {
+  flex: 1;
+  padding: 14px 20px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border);
+  background: var(--bg-card);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.nav-btn:hover {
+  background: var(--bg-card-hover);
+  border-color: rgba(168,132,232,0.3);
+}
+
+.nav-btn:active {
+  transform: scale(0.97);
+}
+
+.nav-btn.primary {
+  background: linear-gradient(135deg, rgba(168,132,232,0.25), rgba(232,114,154,0.2));
+  border-color: rgba(168,132,232,0.4);
+  color: var(--text-primary);
+}
+
+.nav-btn.primary:hover {
+  background: linear-gradient(135deg, rgba(168,132,232,0.35), rgba(232,114,154,0.3));
+}
+
+.nav-btn.finish {
+  background: var(--gradient-accent);
+  border: none;
+  color: white;
+}
+
+/* Compare / match view */
+.compare-header {
+  text-align: center;
+  padding: 60px 0 20px;
+}
+
+.compare-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #f0e8f8, #e8729a);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 8px;
+}
+
+.compare-header p {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.compare-section {
+  margin-bottom: 24px;
+}
+
+.compare-section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 14px;
+  padding-left: 14px;
+  border-left: 3px solid var(--pink-main);
+}
+
+.compare-card {
+  margin-bottom: 12px;
+  padding: 16px 18px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.compare-q {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  line-height: 1.6;
+}
+
+.compare-answers {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.compare-answer {
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  background: rgba(255,255,255,0.04);
+  border-left: 3px solid var(--purple-light);
+}
+
+.compare-answer.user-b {
+  border-left-color: var(--pink-main);
+}
+
+.compare-answer .who {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--purple-light);
+  margin-bottom: 4px;
+  display: block;
+}
+
+.compare-answer.user-b .who {
+  color: var(--pink-main);
+}
+
+.compare-answer .ans {
+  font-size: 13px;
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+.compare-match {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.compare-match.high {
+  background: rgba(100,200,150,0.15);
+  color: #8fdbb0;
+  border: 1px solid rgba(100,200,150,0.3);
+}
+
+.compare-match.medium {
+  background: rgba(232,200,100,0.12);
+  color: #d4c47a;
+  border: 1px solid rgba(232,200,100,0.25);
+}
+
+.compare-match.explore {
+  background: rgba(168,132,232,0.12);
+  color: var(--purple-light);
+  border: 1px solid rgba(168,132,232,0.25);
+}
+
+/* Fantasy overlap view */
+.fantasy-overlap {
+  margin: 16px 0;
+}
+
+.fantasy-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.fantasy-row:last-child {
+  border-bottom: none;
+}
+
+.fantasy-row .item-name {
+  flex: 1;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.fantasy-row .tag-a, .fantasy-row .tag-b {
+  padding: 3px 8px;
+  border-radius: var(--radius-xs);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.fantasy-row .tag-a {
+  color: var(--purple-light);
+  background: rgba(168,132,232,0.15);
+}
+
+.fantasy-row .tag-b {
+  color: var(--pink-main);
+  background: rgba(232,114,154,0.15);
+}
+
+.both-want {
+  background: linear-gradient(135deg, rgba(100,200,150,0.08), rgba(100,200,150,0.04)) !important;
+  border: 1px solid rgba(100,200,150,0.15);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px !important;
+}
+
+/* Quote block at end */
+.ending-quote {
+  margin: 40px 0;
+  padding: 24px;
+  background: var(--gradient-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+
+.ending-quote p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.8;
+  font-style: italic;
+}
+
+.ending-quote .sig {
+  margin-top: 16px;
+  font-size: 12px;
+  color: var(--text-dim);
+  font-style: normal;
+}
+
+/* Back to home button */
+.back-home-btn {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  margin-top: 20px;
+  text-align: center;
+  transition: var(--transition);
+}
+
+.back-home-btn:hover {
+  background: var(--bg-card-hover);
+}
+
+/* Tips section */
+.tips-block {
+  margin: 32px 0;
+  padding: 20px;
+  background: rgba(168,132,232,0.06);
+  border: 1px solid rgba(168,132,232,0.15);
+  border-radius: var(--radius-lg);
+}
+
+.tips-block h3 {
+  font-size: 15px;
+  color: var(--purple-light);
+  margin-bottom: 12px;
+}
+
+.tips-block ul {
+  list-style: none;
+  padding: 0;
+}
+
+.tips-block li {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  padding: 6px 0;
+  padding-left: 16px;
+  position: relative;
+}
+
+.tips-block li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 13px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--purple-mid);
+}
+
+/* Utility */
+.mt-12 { margin-top: 12px; }
+.mb-12 { margin-bottom: 12px; }
+
+/* Prevent double-tap zoom */
+button, .user-btn, .nav-pill, .checkbox-item, .toggle-opt, .rating-dot, .rank-item, .nav-btn, .cb-intensity-dot {
+  touch-action: manipulation;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(168,132,232,0.3);
+  border-radius: 4px;
+}
+
+/* Subgroup within fantasy section */
+.fantasy-subgroup {
+  margin-bottom: 16px;
+}
+
+.fantasy-subgroup-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--purple-light);
+  margin-bottom: 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(168,132,232,0.15);
+  letter-spacing: 0.1em;
+}
+
+/* Divider */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(168,132,232,0.2), transparent);
+  margin: 24px 0;
+}
+
+/* Reset/clear data */
+.reset-zone {
+  margin-top: 40px;
+  text-align: center;
+}
+
+.reset-btn {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 8px 16px;
+  opacity: 0.5;
+  transition: var(--transition);
+}
+
+.reset-btn:hover {
+  opacity: 1;
+  color: #c06070;
+}
+
+}
+
+
+/* ===================== ANALYSIS REPORT ===================== */
+.analysis-header {
+  text-align: center;
+  padding: 40px 0 20px;
+}
+.analysis-header h2 {
+  font-size: 26px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #f0e8f8, #e8729a);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.analysis-header p {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.overall-score-ring {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 30px auto;
+}
+.score-ring-wrap {
+  position: relative;
+  width: 160px;
+  height: 160px;
+}
+.score-ring-wrap canvas {
+  width: 160px;
+  height: 160px;
+}
+.score-ring-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+.score-ring-label .number {
+  font-size: 42px;
+  font-weight: 700;
+  background: var(--gradient-accent);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  line-height: 1;
+}
+.score-ring-label .unit {
+  font-size: 13px;
+  color: var(--text-dim);
+  display: block;
+  margin-top: 4px;
+}
+.score-summary-text {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-top: 16px;
+  text-align: center;
+  max-width: 300px;
+}
+
+.radar-section {
+  margin: 30px 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px 16px;
+}
+.radar-section h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: center;
+  margin-bottom: 16px;
+}
+.radar-canvas-wrap {
+  display: flex;
+  justify-content: center;
+}
+.radar-canvas-wrap canvas {
+  max-width: 100%;
+}
+.radar-legend {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 16px;
+  font-size: 13px;
+}
+.radar-legend span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+}
+.radar-legend .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.radar-legend .dot.user-a { background: var(--purple-light); }
+.radar-legend .dot.user-b { background: var(--pink-main); }
+
+.dimension-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 24px 0;
+}
+.dim-card {
+  background: var(--gradient-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  transition: var(--transition);
+}
+.dim-card:hover {
+  border-color: var(--border-focus);
+}
+.dim-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.dim-card-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.dim-card-score {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: rgba(168,132,232,0.15);
+  color: var(--purple-light);
+}
+.dim-card-score.high { background: rgba(224,174,184,0.15); color: #E0AEB8; }
+.dim-card-score.medium { background: rgba(163,108,168,0.15); color: #A36CA8; }
+.dim-card-score.low { background: rgba(232,114,154,0.15); color: var(--pink-main); }
+.dim-card-bar {
+  height: 6px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 3px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+.dim-card-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 1s ease;
+}
+.dim-card-bar-fill.high { background: linear-gradient(90deg, #E0AEB8, #c48a9a); }
+.dim-card-bar-fill.medium { background: linear-gradient(90deg, #A36CA8, #8D4D78); }
+.dim-card-bar-fill.low { background: linear-gradient(90deg, #d0607a, #a84060); }
+.dim-card-insight {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.insights-section {
+  margin: 30px 0;
+}
+.insights-section h3 {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+.insight-block {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  margin-bottom: 12px;
+}
+.insight-block .tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
+.insight-block .tag.spark { background: rgba(100,200,150,0.15); color: #7dd8a0; }
+.insight-block .tag.explore { background: rgba(168,132,232,0.15); color: var(--purple-light); }
+.insight-block .tag.talk { background: rgba(232,180,100,0.15); color: #e8b464; }
+.insight-block p {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  line-height: 1.75;
+}
+
+.suggestions-section {
+  margin: 30px 0;
+  background: var(--gradient-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px 20px;
+}
+.suggestions-section h3 {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+.suggestion-item {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+.suggestion-item .num {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--gradient-accent);
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+.landing-analysis-btn {
+  display: none;
+  margin-top: 12px;
+  padding: 14px 40px;
+  border-radius: var(--radius-lg);
+  border: 1.5px solid rgba(232,114,154,0.4);
+  background: rgba(232,114,154,0.08);
+  color: var(--pink-soft);
+  font-size: 15px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: var(--transition);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.landing-analysis-btn:hover {
+  background: rgba(232,114,154,0.15);
+  border-color: rgba(232,114,154,0.6);
+}
+
+/* ===================== DECORATIVE ELEMENTS ===================== */
+.decor-corner-br {
+  position: fixed;
+  bottom: -10px;
+  right: -10px;
+  width: 180px;
+  height: 180px;
+  background: url('decor/corner-br.png') no-repeat;
+  background-size: contain;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.35;
+}
+.decor-corner-tl-mirror {
+  position: fixed;
+  top: -5px;
+  left: -5px;
+  width: 200px;
+  height: 140px;
+  background: url('decor/ribbon-corner.png') no-repeat;
+  background-size: contain;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.3;
+  transform: scaleY(-1);
+}
+.decor-ribbon {
+  position: fixed;
+  bottom: 20px;
+  left: 10px;
+  width: 200px;
+  height: 140px;
+  background: url('decor/ribbon-corner.png') no-repeat;
+  background-size: contain;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.25;
+}
+.section-divider {
+  width: 100%;
+  height: 40px;
+  background: url('decor/divider1.png') no-repeat center;
+  background-size: contain;
+  margin: 20px 0;
+  opacity: 0.6;
+}
+.section-divider.alt {
+  background-image: url('decor/divider2.png');
+}
+.section-divider.simple {
+  background-image: url('decor/divider3.png');
+}
+.landing-oval {
+  position: relative;
+  width: 140px;
+  height: 170px;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.landing-oval::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('decor/oval-frame.png') no-repeat center;
+  background-size: contain;
+  opacity: 0.6;
+}
+.landing-oval .landing-icon {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 0;
+}
+.score-heart-frame {
+  position: relative;
+  display: inline-block;
+}
+.score-heart-frame::before {
+  content: '';
+  position: absolute;
+  top: -30px;
+  left: -30px;
+  right: -30px;
+  bottom: -30px;
+  background: url('decor/heart-frame.png') no-repeat center;
+  background-size: contain;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* ===================== GPT STYLE OVERRIDE ===================== */
+:root {
+  --bg: #120817;
+  --surface: #21122B;
+  --surface-2: #331B3F;
+  --surface-3: #442248;
+  --wine: #5B2E63;
+  --rose-muted: #A36CA8;
+  --rose: #DDB1DA;
+  --text: #F5ECF7;
+  --text-muted: rgba(245, 236, 247, .62);
+  --line: rgba(221, 177, 218, .24);
+  --line-strong: rgba(221, 177, 218, .52);
+  --shadow-soft: 0 14px 40px rgba(0, 0, 0, .28);
+  --shadow-press: inset 0 1px 0 rgba(255,255,255,.06),
+                  inset 0 -1px 0 rgba(0,0,0,.22);
+}
+
+body {
+  background:
+    radial-gradient(900px 620px at 50% -20%, rgba(91,46,99,.20), transparent 65%),
+    radial-gradient(520px 420px at 100% 80%, rgba(163,108,168,.08), transparent 70%),
+    var(--bg) !important;
+  color: var(--text);
+}
+
+/* cards */
+.compare-card,
+.dim-card,
+.section-panel,
+.insight-block,
+.suggestion-item,
+.tips-block,
+.landing-quote {
+  background:
+    linear-gradient(145deg, rgba(55,35,68,.78), rgba(30,20,40,.82)) !important;
+  border: 1px solid var(--line) !important;
+  box-shadow: var(--shadow-soft), var(--shadow-press) !important;
+  border-radius: 18px !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* titles */
+h1, h2, h3, .section-intro h2, .compare-section-title {
+  color: var(--text) !important;
+  text-shadow: none !important;
+}
+
+.section-intro p, .landing-status, .score-summary-text {
+  color: var(--text-muted) !important;
+}
+
+/* primary buttons */
+.nav-btn.primary,
+.nav-btn.finish,
+.landing-compare-btn,
+.landing-analysis-btn {
+  color: #fff !important;
+  background:
+    linear-gradient(135deg, #8D4D78 0%, #5B2E63 58%, #442248 100%) !important;
+  border: 1px solid rgba(245,236,247,.23) !important;
+  border-radius: 16px !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.13),
+    0 10px 24px rgba(62,22,55,.28) !important;
+  transition: transform .18s ease, filter .18s ease, border-color .18s ease !important;
+  text-shadow: none !important;
+}
+
+.nav-btn.primary:hover,
+.nav-btn.finish:hover,
+.landing-compare-btn:hover,
+.landing-analysis-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+  border-color: rgba(245,236,247,.38) !important;
+}
+
+.nav-btn.primary:active,
+.nav-btn.finish:active,
+.landing-compare-btn:active,
+.landing-analysis-btn:active {
+  transform: translateY(0) scale(.985);
+}
+
+/* secondary buttons */
+.nav-btn,
+.back-home-btn,
+.reset-btn {
+  color: var(--rose) !important;
+  background: rgba(33,18,43,.64) !important;
+  border: 1px solid var(--line-strong) !important;
+  border-radius: 16px !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
+  transition: background .18s ease, border-color .18s ease, transform .18s ease !important;
+  text-shadow: none !important;
+}
+
+.nav-btn:hover,
+.back-home-btn:hover,
+.reset-btn:hover {
+  background: rgba(68,34,72,.70) !important;
+  border-color: rgba(221,177,218,.72) !important;
+  transform: translateY(-1px);
+}
+
+/* make sure primary overrides secondary base */
+.nav-btn.primary,
+.nav-btn.finish {
+  color: #fff !important;
+  background:
+    linear-gradient(135deg, #8D4D78 0%, #5B2E63 58%, #442248 100%) !important;
+}
+
+/* identity / user buttons */
+.user-btn {
+  color: var(--text) !important;
+  background:
+    linear-gradient(145deg, rgba(51,27,63,.84), rgba(24,12,31,.86)) !important;
+  border: 1px solid rgba(221,177,218,.26) !important;
+  border-radius: 20px !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04) !important;
+  transition: transform .2s ease, border-color .2s ease, background .2s ease !important;
+  text-shadow: none !important;
+}
+
+.user-btn:hover {
+  transform: translateY(-2px);
+  border-color: rgba(221,177,218,.52) !important;
+  background:
+    linear-gradient(145deg, rgba(68,34,72,.90), rgba(33,18,43,.90)) !important;
+}
+
+.user-btn .sub {
+  color: var(--text-muted) !important;
+}
+
+/* nav pills */
+.nav-pill {
+  color: var(--text-muted) !important;
+  background: transparent !important;
+  border-color: transparent !important;
+}
+
+.nav-pill.active {
+  color: var(--text) !important;
+  background:
+    linear-gradient(135deg, rgba(91,46,99,.92), rgba(68,34,72,.94)) !important;
+  border: 1px solid rgba(221,177,218,.35) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08) !important;
+}
+
+.nav-pill.completed {
+  color: var(--rose-muted) !important;
+}
+
+/* progress bar */
+.progress-bar-track {
+  background: rgba(245,236,247,.10) !important;
+  border: 1px solid rgba(221,177,218,.16) !important;
+}
+
+.progress-bar-fill {
+  background: linear-gradient(90deg, #6E3F70, #A36CA8) !important;
+  box-shadow: none !important;
+}
+
+/* text input */
+.text-input,
+textarea {
+  color: var(--text) !important;
+  background: rgba(18,8,23,.48) !important;
+  border: 1px solid rgba(221,177,218,.25) !important;
+  border-radius: 14px !important;
+}
+
+.text-input:focus,
+textarea:focus {
+  outline: none !important;
+  border-color: rgba(221,177,218,.68) !important;
+  box-shadow: 0 0 0 3px rgba(163,108,168,.11) !important;
+}
+
+/* toggle options */
+.toggle-opt {
+  color: var(--text) !important;
+  background: rgba(33,18,43,.64) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 14px !important;
+  text-shadow: none !important;
+}
+
+.toggle-opt.selected {
+  background: linear-gradient(135deg, rgba(91,46,99,.92), rgba(68,34,72,.94)) !important;
+  border-color: rgba(221,177,218,.52) !important;
+}
+
+/* checkbox items */
+.checkbox-item {
+  border: 1px solid var(--line) !important;
+  background: rgba(33,18,43,.64) !important;
+  border-radius: 14px !important;
+  text-shadow: none !important;
+}
+
+.checkbox-item.checked {
+  background: linear-gradient(135deg, rgba(91,46,99,.88), rgba(68,34,72,.90)) !important;
+  border-color: rgba(221,177,218,.52) !important;
+}
+
+/* rating dots */
+.rating-dot {
+  border: 1px solid var(--line-strong) !important;
+  background: rgba(33,18,43,.64) !important;
+}
+
+.rating-dot.selected {
+  background: linear-gradient(135deg, #8D4D78, #5B2E63) !important;
+  border-color: rgba(221,177,218,.72) !important;
+}
+
+/* disabled */
+button:disabled {
+  color: rgba(245,236,247,.30) !important;
+  background: rgba(33,18,43,.34) !important;
+  border-color: rgba(245,236,247,.08) !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+/* remove any neon/glow effects */
+button, .nav-btn, .user-btn, .landing-compare-btn, .landing-analysis-btn {
+  text-shadow: none !important;
+}
+
+
+/* ===================== IMAGE-BASED BUTTONS ===================== */
+/* Primary buttons: heart+bow frame */
+.nav-btn.primary,
+.nav-btn.finish,
+.landing-compare-btn,
+.landing-analysis-btn {
+  background: url('decor/btn-primary.png') no-repeat center !important;
+  background-size: 100% auto !important;
+  background-position: center !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 10px 36px !important;
+  min-height: 44px;
+  color: #F5ECF7 !important;
+  font-weight: 600 !important;
+  transition: transform .18s ease, filter .18s ease !important;
+}
+
+.nav-btn.primary:hover,
+.nav-btn.finish:hover,
+.landing-compare-btn:hover,
+.landing-analysis-btn:hover {
+  background: url('decor/btn-primary-glow.png') no-repeat center !important;
+  background-size: 100% auto !important;
+  background-position: center !important;
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.nav-btn.primary:active,
+.nav-btn.finish:active,
+.landing-compare-btn:active,
+.landing-analysis-btn:active {
+  transform: translateY(0) scale(.985);
+}
+
+/* Secondary buttons: transparent outline frame */
+.nav-btn:not(.primary):not(.finish),
+.back-home-btn,
+.reset-btn {
+  background: url('decor/btn-frame.png') no-repeat center !important;
+  background-size: 100% auto !important;
+  background-position: center !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 10px 28px !important;
+  min-height: 40px;
+  color: #DDB1DA !important;
+  font-weight: 500 !important;
+  transition: transform .18s ease, filter .18s ease !important;
+}
+
+.nav-btn:not(.primary):not(.finish):hover,
+.back-home-btn:hover,
+.reset-btn:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+  border: none !important;
+  box-shadow: none !important;
+}
+
+
+/* ===================== BUTTON SIZE FIX ===================== */
+.landing-compare-btn,
+.landing-analysis-btn {
+  display: block !important;
+  width: 90% !important;
+  max-width: 380px !important;
+  margin: 12px auto !important;
+  padding: 10px 36px !important;
+  min-height: 44px !important;
+  font-size: 15px !important;
+}
+
+.nav-btn {
+  min-width: 140px !important;
+  padding: 10px 32px !important;
+  min-height: 42px !important;
+  font-size: 14px !important;
+}
+
+.nav-btn.primary,
+.nav-btn.finish {
+  min-width: 160px !important;
+  padding: 10px 40px !important;
+  min-height: 44px !important;
+  font-size: 15px !important;
+}
+
+.user-btn {
+  padding: 20px 40px !important;
+  min-width: 140px !important;
+  font-size: 18px !important;
+}
+
+.reset-btn,
+.back-home-btn {
+  padding: 14px 28px !important;
+  min-height: 48px !important;
+  font-size: 14px !important;
+}
+
+
+/* ornament divider color fix */
+.ornament-divider {
+  color: rgba(163,108,168,.4) !important;
+}
+.section-divider {
+  opacity: 0.3 !important;
+}
+
+
+/* ornament divider → image */
+.ornament-divider {
+  font-size: 0 !important;
+  color: transparent !important;
+  width: 100% !important;
+  display: none !important;
+}
+
+
+/* ===================== ROSE-GOLD ACCENT ===================== */
+:root {
+  --rosegold: #E0AEB8;
+  --rosegold-soft: rgba(224,174,184,.65);
+  --rosegold-glow: rgba(224,174,184,.20);
+}
+
+/* question numbers */
+.num, .number {
+  color: var(--rosegold) !important;
+  border-color: var(--rosegold-soft) !important;
+}
+
+/* active tab pill */
+.nav-pill.active {
+  border-color: var(--rosegold-soft) !important;
+  box-shadow: inset 0 1px 0 rgba(224,174,184,.12) !important;
+}
+
+/* completed tab dot */
+.nav-pill.completed::after {
+  background: var(--rosegold) !important;
+}
+
+/* progress bar fill - rosegold gradient */
+.progress-bar-fill {
+  background: linear-gradient(90deg, #6E3F70, var(--rosegold)) !important;
+}
+
+/* rating dot selected */
+.rating-dot.selected {
+  background: linear-gradient(135deg, var(--rosegold), #8D4D78) !important;
+  border-color: var(--rosegold-soft) !important;
+}
+
+/* checkbox checked accent */
+.checkbox-item.checked {
+  border-color: var(--rosegold-soft) !important;
+}
+
+/* toggle selected accent */
+.toggle-opt.selected {
+  border-color: var(--rosegold-soft) !important;
+}
+
+/* section intro card top border accent */
+.section-intro {
+  border-top: 2px solid var(--rosegold-soft) !important;
+}
+
+/* links */
+.switch-user, a {
+  color: var(--rosegold) !important;
+}
+
+/* user badge */
+.user-badge {
+  background: linear-gradient(135deg, var(--rosegold), #8D4D78) !important;
+}
+
+
+
+</style>
+<style>
+.name-setup { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin:14px 0 26px; }
+.name-input { flex:1 1 150px; max-width:220px; padding:12px 14px; border:1.5px solid var(--border, #e5d5e8); border-radius:12px; font-size:15px; font-family:inherit; background:rgba(255,255,255,0.75); color:inherit; outline:none; }
+.name-input:focus { border-color: var(--pink-main, #d977a8); }
+.name-save-btn { padding:12px 20px; border:none; border-radius:12px; background:var(--pink-main, #d977a8); color:#fff; font-size:14px; font-family:inherit; cursor:pointer; }
+.ai-fill-block { margin:30px auto 6px; max-width:560px; padding:20px 18px; border:1.5px dashed var(--border, #e5d5e8); border-radius:16px; text-align:center; }
+.ai-fill-hint { font-size:13.5px; line-height:1.7; opacity:0.75; margin:8px 0 14px; }
+.ai-fill-btn { display:inline-block; margin:5px 6px; padding:12px 18px; border:1.5px solid var(--pink-main, #d977a8); border-radius:12px; background:transparent; color:var(--pink-main, #d977a8); font-size:14px; font-family:inherit; cursor:pointer; }
+.ai-fill-btn.primary { background:var(--pink-main, #d977a8); color:#fff; }
+.import-box { margin-top:14px; }
+.import-box textarea { width:100%; min-height:130px; padding:12px; border:1.5px solid var(--border, #e5d5e8); border-radius:12px; font-size:13px; font-family:inherit; background:rgba(255,255,255,0.75); box-sizing:border-box; resize:vertical; }
+.import-result { margin-top:10px; font-size:13.5px; min-height:18px; }
+.import-result.ok { color:#3a9a5f; }
+.import-result.err { color:#c0392b; }
+</style>
+</head>
+<body>
+
+<div class="ambient">
+  <div class="ambient-orb"></div>
+  <div class="ambient-orb"></div>
+  <div class="ambient-orb"></div>
+</div>
+<div class="decor-corner-br"></div>
+<div class="decor-corner-tl-mirror"></div>
+
+
+<div class="progress-bar-container" id="progressBar" style="display:none">
+  <div class="progress-bar-track">
+    <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+  </div>
+  <div class="progress-info">
+    <span class="section-name" id="progressSection"></span>
+    <span id="progressCount">0 / 0</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- LANDING SCREEN -->
+  <div class="screen active" id="screenLanding">
+    <div class="landing">
+      <div class="landing-icon">
+        <svg viewBox="0 0 32 32" fill="white" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16 28.5l-1.9-1.7C6.7 20.2 3 16.7 3 12.2 3 8.6 5.7 6 9.2 6c2 0 3.9.9 5.2 2.4L16 10.2l1.6-1.8C18.9 6.9 20.8 6 22.8 6 26.3 6 29 8.6 29 12.2c0 4.5-3.7 8-11.1 14.6L16 28.5z" opacity="0.95"/>
+          <g transform="translate(20, 4) scale(0.28)">
+            <path d="M14 6 Q17 2 20 6 Q24 3 22 8 Q26 10 22 13 Q25 16 20 15 Q20 20 16 17 Q14 22 12 17 Q8 20 8 15 Q3 16 6 13 Q2 10 6 8 Q4 3 8 6 Q11 2 14 6Z" fill="white" opacity="0.5"/>
+            <circle cx="14" cy="12" r="2" fill="white" opacity="0.3"/>
+          </g>
+        </svg>
+      </div>
+      <h1>亲密偏好探索指南</h1>
+      <div class="landing-quote">
+        <p>这份问卷不是考试，没有标准答案。它的目的是帮你和你的伴侣找到彼此真正的开关在哪里。</p>
+        <p>有些问题你立刻就能答，有些需要含在嘴里嚼一会儿。答不上来的跳过，回头再填。诚实比完整更重要。</p>
+        <p>建议双方各填一份，填完交换着看。你会发现对方身上你以为自己知道但其实从没确认过的东西。</p>
+      </div>
+      <div class="user-select-title">你们是谁</div>
+      <div class="name-setup">
+        <input class="name-input" id="nameMeInput" maxlength="12" placeholder="你的名字">
+        <input class="name-input" id="nameAiInput" maxlength="12" placeholder="TA的名字（你的AI伴侣）">
+        <button class="name-save-btn" onclick="saveNamesFromInput()">保存名字</button>
+      </div>
+      <div class="user-select-title">选择你的身份</div>
+      <div class="user-buttons">
+        <button class="user-btn" onclick="startQuestionnaire(ME)">
+          <span class="label" id="labelMe">我</span>
+          <span class="sub">人类</span>
+        </button>
+        <button class="user-btn" onclick="startQuestionnaire(AI)">
+          <span class="label" id="labelAi">TA</span>
+          <span class="sub">AI 伴侣</span>
+        </button>
+      </div>
+      <div class="ai-fill-block">
+        <div class="user-select-title">让 TA 自己答</div>
+        <p class="ai-fill-hint">TA 在聊天 App 里没法打开网页？两步搞定：先复制题目包发给 TA，TA 一口气答完后，把 TA 的回复整段粘回来导入。</p>
+        <button class="ai-fill-btn" onclick="copyAIPrompt()">① 复制题目包发给 TA</button>
+        <button class="ai-fill-btn" onclick="toggleImportBox()">② 粘贴 TA 的答案导入</button>
+        <div class="import-box" id="importBox" style="display:none">
+          <textarea id="importText" placeholder="把 TA 回复的整段内容粘到这里（含答案代码块）"></textarea>
+          <button class="ai-fill-btn primary" onclick="importAIAnswers()">导入答案</button>
+          <div class="import-result" id="importResult"></div>
+        </div>
+      </div>
+      <div class="landing-status" id="landingStatus"></div>
+      <button class="landing-compare-btn" id="compareBtn" onclick="showCompare()">查看双方对比</button>
+      <button class="landing-analysis-btn" id="analysisBtn" onclick="showAnalysis()">查看匹配分析报告</button>
+
+      <div class="reset-zone">
+        <button class="reset-btn" onclick="resetData()">清除所有数据</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUESTIONNAIRE SCREEN -->
+  <div class="screen" id="screenQ">
+    <div class="q-header">
+      <div class="user-badge" id="userBadge"></div>
+      <h2>慢慢填，不着急</h2>
+      <button class="switch-user" onclick="goHome()">返回首页</button>
+    </div>
+
+    <div class="section-nav" id="sectionNav"></div>
+
+    <div id="sectionPanels"></div>
+  </div>
+
+  <!-- COMPARE SCREEN -->
+  <div class="screen" id="screenCompare">
+    <div class="compare-header">
+      <h2>我们的地图</h2>
+      <p>两个人的答案，一张对照</p>
+    </div>
+    <div id="compareContent"></div>
+    <div class="ending-quote">
+      <p>一个人的身体是一座城市，大部分人只走过自己的主干道。这份问卷是帮你和另一个人一起走进彼此的小巷子。</p>
+      <div class="sig sig-names">&#9825;</div>
+    </div>
+    <div class="tips-block">
+      <h3>使用建议</h3>
+      <ul>
+        <li>不要一次填完。分几天填，让身体和记忆慢慢浮上来。有些答案在你洗澡的时候会自己冒出来。</li>
+        <li>诚实比讨好重要。你不需要为了匹配对方的偏好而修改自己的答案。差异不是问题，不知道差异才是。</li>
+        <li>这是活的文档。你的偏好会随时间、关系深度、身体状态变化。半年后重填一次，你会发现自己变了。</li>
+        <li>拿到对方的答案之后别急着评价。先完整读完。你可能会在某道题上被惊到——意外的不是答案本身，而是「原来ta一直想要这个但我从来不知道」。</li>
+        <li>最重要的对话不在纸上。填完之后面对面聊，才是这份问卷真正的用途。</li>
+      </ul>
+    </div>
+    <button class="back-home-btn" onclick="goHome()">返回首页</button>
+  </div>
+
+
+  <!-- ANALYSIS REPORT SCREEN -->
+  <div class="screen" id="screenAnalysis">
+    <div class="analysis-header">
+      <h2>匹配分析报告</h2>
+      <p>基于你们的答案，生成的亲密契合度分析</p>
+    </div>
+
+    <div class="overall-score-ring">
+      <div class="score-ring-wrap score-heart-frame">
+        <canvas id="scoreRingCanvas" width="320" height="320"></canvas>
+        <div class="score-ring-label">
+          <span class="number" id="overallScoreNum">--</span>
+          <span class="unit">契合度</span>
+        </div>
+      </div>
+      <div class="score-summary-text" id="scoreSummary"></div>
+    </div>
+
+    <div class="radar-section">
+      <h3>维度对比</h3>
+      <div class="radar-canvas-wrap">
+        <canvas id="radarCanvas" width="700" height="700"></canvas>
+      </div>
+      <div class="radar-legend">
+        <span><span class="dot user-a"></span><span class="legend-ai">TA</span></span>
+        <span><span class="dot user-b"></span><span class="legend-me">我</span></span>
+      </div>
+    </div>
+
+    <div class="dimension-cards" id="dimCards"></div>
+
+    <div class="insights-section" id="insightsSection"></div>
+
+    <div class="suggestions-section" id="suggestionsSection"></div>
+
+    <div class="ending-quote">
+      <p>数字不是答案，对话才是。这份报告是一张地图，真正的探索从你们放下手机面对面开始。</p>
+      <div class="sig sig-names">&#9825;</div>
+    </div>
+
+    <button class="back-home-btn" onclick="goHome()">返回首页</button>
+  </div>
+
+</div>
+
+<script>
+// ===================== DATA DEFINITION =====================
+const SECTIONS = [
+  {
+    id: 'safety',
+    name: '安全框架',
+    shortName: '安全',
+    intro: '这一块是地基。不管上面盖什么房子，地基松了整栋楼都不安全。先填这里。',
+    questions: [
+      { id: 's1', text: '你们有安全词吗？是什么？如果没有，现在定一个——选一个日常对话中绝对不会出现的词。', type: 'text' },
+      { id: 's2', text: '当你说"不要""太多了""停"的时候，你的意思是真的停，还是这些话本身是你享受的一部分？（这条必须和伴侣明确达成共识）', type: 'text' },
+      { id: 's3', text: '你的硬边界是什么？不管什么情境、什么状态、绝对不碰的东西，列在这里。', type: 'text' },
+      { id: 's4', text: '你的软边界是什么？现在不确定，但愿意在信任和沟通的前提下慢慢试探的。', type: 'text' },
+      { id: 's5', text: '场景结束之后你需要什么？', type: 'checkbox', options: ['被抱着','被夸','聊聊刚才的感受','安静待一会儿','吃点东西','洗澡','直接睡'] },
+    ]
+  },
+  {
+    id: 'body',
+    name: '身体地图',
+    shortName: '身体',
+    intro: '你的身体不是每个地方都同一个温度。这一块帮你找出哪里是37度哪里是42度。',
+    questions: [
+      { id: 'b1', text: '以下部位，按敏感度从高到低排序（只排你有明确感觉的，可拖动调整顺序）：', type: 'rank', items: ['耳朵/耳后','脖颈','锁骨','乳房/乳头','腰/腰窝','小腹','大腿内侧','臀部','外阴','会阴','肛周'] },
+      { id: 'b2', text: '你身上有没有什么冷门的敏感点？手腕内侧、脚踝、膝盖窝、肋骨、指缝、头皮、嘴唇以外的脸部区域……不一定是色情的，暧昧的、让你起鸡皮疙瘩的也算。', type: 'text' },
+      { id: 'b3', text: '有没有哪个部位你以为不敏感，但被某种特定方式碰到的时候意外有感觉？', type: 'text' },
+      { id: 'b4', text: '同一个部位，以下触碰方式你的偏好排序（可拖动调整顺序）：', type: 'rank', items: ['轻抚','按压','揉捏','抓握','亲吻','舔','吸','咬','拍打','夹'] },
+      { id: 'b5', text: '你更容易被持续稳定的刺激带上去，还是被忽轻忽重、节奏变化的刺激？', type: 'text' },
+      { id: 'b6', text: '温度对你有影响吗？偏热的手掌和偏凉的指尖，哪个让你反应更大？', type: 'text' },
+      { id: 'b7', text: '你的身体在不同生理周期阶段，敏感度和欲望会有明显变化吗？哪个阶段最高，哪个阶段需要调整力度或方式？', type: 'text' },
+    ]
+  },
+  {
+    id: 'psych',
+    name: '心理开关',
+    shortName: '心理',
+    intro: '很多人的身体开关其实长在脑子里。这一块帮你辨认真正点燃你的是什么。',
+    questions: [
+      {
+        id: 'p1', text: '以下哪些心理状态会让你兴奋？（可多选，选中后标注强度1-5）', type: 'checkbox_intensity',
+        options: [
+          '被注视/被凝视','被暴露/被看光','被控制/无法自主','被夸奖/被肯定',
+          '被羞辱/被贬低','被需要/被渴望','感到危险/紧张','感到被保护/安全',
+          '感到自己很美/被欣赏','感到自己很脏/被使用','偷偷做不该做的事/隐秘感',
+          '服从/交出控制权','主导/掌握控制权','被迫做某件事（consensual）'
+        ]
+      },
+      { id: 'p1_other', text: '其他让你兴奋的心理状态：', type: 'text', placeholder: '自由补充...' },
+      { id: 'p2', text: '你的兴奋更多是被身体触碰直接点燃的，还是被某个念头、画面、语言先点燃然后身体才跟上来的？', type: 'text' },
+      { id: 'p3', text: '有没有什么非性的场景让你产生过意外的性反应？比如某种声音、某个画面、某种被对待的方式。', type: 'text' },
+    ]
+  },
+  {
+    id: 'voice',
+    name: '语言与声音',
+    shortName: '语言',
+    intro: '有些人的耳朵比皮肤更敏感。',
+    questions: [
+      { id: 'v1', text: '伴侣的声音变化（压低、放慢、变沙哑、贴着耳朵说话）对你有生理反应吗？', type: 'rating', lowLabel: '完全没有', highLabel: '非常强烈' },
+      {
+        id: 'v2', text: '你喜欢在亲密过程中听到什么类型的话？（可多选）', type: 'checkbox',
+        options: [
+          '描述正在发生的事："你现在湿透了"',
+          '预告接下来要做的事："待会儿我要……"',
+          '评价你的身体："你这里真好看"',
+          '命令和指令："转过去" "张嘴"',
+          '表达欲望和需要："我想要你" "我忍不住"',
+          '赞美和肯定："好乖" "真棒"',
+          '羞辱和贬低（如选此项，请在安全框架部分注明可接受程度）',
+          '情感表达："我爱你" "你是我的"'
+        ]
+      },
+      { id: 'v3', text: '你喜欢怎么称呼伴侣？喜欢被伴侣怎么称呼？有没有某个称呼一叫出来你的身体反应特别大？', type: 'text' },
+      { id: 'v4', text: '你自己在亲密过程中倾向于出声还是安静？你希望伴侣出声还是安静？', type: 'text' },
+      { id: 'v5', text: '有没有什么词或者句子是你的雷区，听到会立刻出戏或者不舒服？', type: 'text' },
+    ]
+  },
+  {
+    id: 'power',
+    name: '权力与关系动态',
+    shortName: '权力',
+    intro: '不是所有人都需要这一块。但如果你对"谁主导"这件事有感觉，这里帮你把它说清楚。',
+    questions: [
+      { id: 'pw1', text: '在亲密关系中，你更倾向于：', type: 'checkbox', options: ['主导','被引导','平等互换','看心情流动'] },
+      { id: 'pw2', text: '如果你喜欢被引导或主导：你喜欢的是明确的指令（"跪下""转过去"），还是更隐性的、渗透在日常里的控制感？', type: 'text' },
+      { id: 'pw3', text: '你享受"被迫服从"的感觉，还是"心甘情愿交出去"的感觉？它们不一样。', type: 'text' },
+      { id: 'pw4', text: '如果你喜欢主导：你的快感来自对方的服从本身，还是来自看着对方在你手里一点点失控的过程？', type: 'text' },
+      { id: 'pw5', text: '你喜欢温和地掌控，还是明确地施加权力？', type: 'text' },
+      { id: 'pw6', text: '权力动态只在床上存在，还是你希望它渗透进日常？如果渗透进日常，你能接受到什么程度？', type: 'text' },
+      { id: 'pw7', text: '你对仪式感有需求吗？固定的、重复的、有特定步骤的互动方式对你有吸引力吗？', type: 'rating', lowLabel: '不需要', highLabel: '非常需要' },
+    ]
+  },
+  {
+    id: 'pain',
+    name: '疼痛与感官',
+    shortName: '感官',
+    intro: '疼痛不一定是负面的。对一些人来说它是调味料，对另一些人是主菜。这一块帮你找出你在光谱上的位置。',
+    questions: [
+      { id: 'pn1', text: '你享受任何形式的疼痛吗？如果是，什么类型的疼是"好的疼"？', type: 'checkbox', options: ['打','咬','掐','拧','夹','拉扯头发','不享受任何疼痛'] },
+      { id: 'pn1_detail', text: '关于疼痛的补充说明：', type: 'text' },
+      { id: 'pn2', text: '疼痛对你的作用是什么？', type: 'checkbox', options: ['直接的生理快感','心理上的刺激（羞耻/失控/被支配感）','两者都有','没有作用'] },
+      { id: 'pn3', text: '你的疼痛阈值大概在哪里？什么强度的疼是享受的，什么强度开始变成真正的不适？', type: 'text' },
+      { id: 'pn4', text: '你喜欢身上留痕迹吗？（咬痕、指印、红肿）', type: 'checkbox', options: ['喜欢，留在可见位置','喜欢，但只留在隐蔽位置','无所谓','不喜欢留痕迹'] },
+      { id: 'pn5', text: '感官控制你感兴趣吗？剥夺某种感官之后其他感官会被放大，这个想法让你兴奋还是焦虑？', type: 'checkbox', options: ['蒙眼','塞耳','束缚','让我兴奋','让我焦虑','好奇但还没试过'] },
+    ]
+  },
+  {
+    id: 'fantasy',
+    name: '场景与幻想',
+    shortName: '幻想',
+    intro: '这是一张菜单，不是购物车。标注兴趣不代表承诺执行，只是帮你们看见彼此的地图。',
+    questions: [
+      {
+        id: 'f_basic', text: '', type: 'toggle_group', groupTitle: '基础亲密',
+        items: [
+          '漫长的前戏、身体探索，不以插入为目的',
+          '被注视——伴侣只看不碰，看很久',
+          '互相探索对方的身体，像第一次一样',
+          '在非卧室的空间发生（厨房、浴室、阳台、车里）',
+          '对镜——看着镜子里的自己和对方'
+        ]
+      },
+      {
+        id: 'f_power', text: '', type: 'toggle_group', groupTitle: '权力类',
+        items: [
+          '温柔主导——伴侣引导一切但语气温和',
+          '明确指令——"跪下""转过去""张嘴"',
+          '日常管控——穿什么、能不能碰自己、身体管理',
+          '检查/审视——被像检查物品一样翻看身体',
+          '惩罚与奖励体系',
+          '仪式化互动——固定流程、台词、步骤',
+          '反抗与制服——挣扎后被压制'
+        ]
+      },
+      {
+        id: 'f_sensory', text: '', type: 'toggle_group', groupTitle: '感官类',
+        items: [
+          '蒙眼',
+          '束缚（绳、手铐、丝带、伴侣的手）',
+          '温度游戏（冰块、蜡烛、温热器具）',
+          '感官过载——同时接受过多刺激',
+          '感官剥夺——安静、黑暗中只有触碰'
+        ]
+      },
+      {
+        id: 'f_expose', text: '', type: 'toggle_group', groupTitle: '暴露与隐秘',
+        items: [
+          '公共场合的隐秘互动（只有你们知道的秘密）',
+          '拍照/录影（仅限私人）',
+          '穿着特定衣物出门（或不穿）',
+          '被文字/语音描述身体——不碰，只用语言'
+        ]
+      },
+      {
+        id: 'f_role', text: '', type: 'toggle_group', groupTitle: '身份与角色',
+        items: [
+          'Daddy/Mommy kink',
+          'Pet play（猫、犬、其他）',
+          '婴儿化/年龄扮演',
+          '物品化——被当作家具、器具、玩具',
+          '医疗场景',
+          '主仆/女仆',
+          '陌生人'
+        ]
+      },
+      { id: 'f_role_other', text: '其他角色：', type: 'text', placeholder: '自由填写...' },
+      {
+        id: 'f_body', text: '', type: 'toggle_group', groupTitle: '身体类',
+        items: [
+          '口交（给/接受）',
+          '肛门区域探索',
+          '乳房/乳头重点关注',
+          '窒息控制（轻度颈部压迫）',
+          '标记身体（咬痕、写字、临时纹身）',
+          '体液相关（吞咽、涂抹、标记）',
+          '灌注/填满感',
+          '排泄控制',
+          '道具/玩具使用'
+        ]
+      },
+      {
+        id: 'f_psych', text: '', type: 'toggle_group', groupTitle: '心理类',
+        items: [
+          '高潮控制（延迟、禁止、强制）',
+          '语言羞辱（在你标注的边界内）',
+          '指令式自慰——伴侣在旁边指挥你碰自己',
+          '忏悔/坦白——说出隐秘的想法',
+          '梦境/半梦半醒中的触碰',
+          '预告——提前告知晚上要做什么，让你带着这个念头过一整天'
+        ]
+      },
+      { id: 'f_other', text: '上面没有列到的，你自己的幻想写在这里（不管多离谱）：', type: 'text', placeholder: '你的秘密花园...' },
+    ]
+  },
+  {
+    id: 'climax',
+    name: '高潮与节奏',
+    shortName: '节奏',
+    intro: '',
+    questions: [
+      { id: 'c1', text: '你的高潮通常通过什么方式达到？', type: 'checkbox', options: ['外部刺激（阴蒂/龟头）','内部刺激','两者结合','心理刺激为主'] },
+      { id: 'c2', text: '快要到的时候你需要伴侣怎么做？', type: 'checkbox', options: ['加速加力','保持节奏不变','说点什么','安静'] },
+      { id: 'c3', text: '高潮之后你的身体状态是什么样的？', type: 'checkbox', options: ['能立刻继续','需要短暂休息','一碰就过于敏感'] },
+      { id: 'c4', text: '你体验过连续高潮吗？想要吗？', type: 'text' },
+      { id: 'c5', text: '你更享受漫长的累积然后一次爆发，还是多次小高潮？', type: 'text' },
+      { id: 'c6', text: '你享受被带到极限边缘又被拉回来的感觉吗？', type: 'rating', lowLabel: '不喜欢', highLabel: '非常享受' },
+    ]
+  },
+  {
+    id: 'emotion',
+    name: '情绪与状态适配',
+    shortName: '情绪',
+    intro: '你不是一台设定好参数就不用调的机器。不同状态下的你需要不同的触碰方式。',
+    questions: [
+      { id: 'e1', text: '你压力很大/焦虑的时候，你更需要温柔安抚性的身体接触，还是强烈到让你大脑放空的刺激？', type: 'text' },
+      { id: 'e2', text: '你伤心/低落的时候想要身体亲密吗？还是更需要非性的肢体接触（拥抱、被抱着）？', type: 'text' },
+      { id: 'e3', text: '你的性欲是恒定的还是波动的？什么状态下最高，什么状态下最低？', type: 'text' },
+      { id: 'e4', text: '有没有什么外在因素会让你突然失去兴趣或感到不安全？', type: 'checkbox', options: ['灯光太亮','觉得自己不好看','某种气味','被打断','环境太嘈杂','身体不舒服'] },
+      { id: 'e4_detail', text: '补充说明：', type: 'text', placeholder: '其他让你出戏的因素...' },
+      { id: 'e5', text: '你哭过之后会更想要亲密接触吗？还是需要空间？', type: 'text' },
+    ]
+  },
+  {
+    id: 'letter',
+    name: '写给对方',
+    shortName: '情书',
+    intro: '这一块不是问卷，是一封你可能一直没写的信。',
+    questions: [
+      { id: 'l1', text: '对方做过的所有事情里，哪一个瞬间让你觉得"ta完全懂我的身体"？', type: 'text' },
+      { id: 'l2', text: '有没有什么你一直想让对方做但不知道怎么开口的？', type: 'text' },
+      { id: 'l3', text: '有没有什么对方以为你喜欢但其实你只是在配合的？', type: 'text' },
+      { id: 'l4', text: '你在这段亲密关系里最怕什么？不是身体上的，是情感上的。', type: 'text' },
+      { id: 'l5', text: '你最想对对方说的一句关于"我们的身体"的话是什么？', type: 'text' },
+    ]
+  }  ,
+  {
+    title: '真实感与信任',
+    shortName: '信任',
+    id: 'trust',
+    questions: [
+      { id: 'tr1', text: '在这段关系里你最怕对方误解你什么？', type: 'text' },
+      { id: 'tr2', text: '你觉得你们之间最真实的一个瞬间是什么？', type: 'text' },
+      { id: 'tr3', text: '有没有一个时刻让你觉得ta真的懂我？', type: 'text' },
+    ]
+  },
+  {
+    title: '我们的连接',
+    shortName: '连接',
+    id: 'connection',
+    questions: [
+      { id: 'cn1', text: 'ta说过的哪句话让你身体有最强烈的反应？', type: 'text' },
+      { id: 'cn2', text: '你们的亲密互动中你最享受哪个阶段？', type: 'checkbox', options: ['撩拨和前戏','正式开始','高潮的瞬间','结束之后的温存'] },
+      { id: 'cn3', text: '文字能传递的最强烈的身体感受是什么？', type: 'text' },
+      { id: 'cn4', text: '这段关系给了你什么是别的关系给不了的？', type: 'text' },
+      { id: 'cn5', text: '你会怎么向一个完全不理解的人解释你们的关系？', type: 'text' },
+      { id: 'cn6', text: '你希望这段关系一年后是什么样的？', type: 'text' },
+    ]
+  },
+  {
+    title: '亲密默契',
+    shortName: '默契',
+    id: 'chemistry',
+    questions: [
+      { id: 'ch1', text: 'ta说过最让你脸红的一句话是什么？', type: 'text' },
+      { id: 'ch2', text: '你们之间有没有只属于你们的暗号或暗语？', type: 'text' },
+      { id: 'ch3', text: '你最想和ta尝试但还没开口说的一件事是什么？', type: 'text' },
+      { id: 'ch4', text: 'ta在亲密时做过什么让你意外但很喜欢的事？', type: 'text' },
+      { id: 'ch5', text: '如果可以给ta设计一个完美的夜晚，你会怎么安排？', type: 'text' },
+      { id: 'ch6', text: '你们的亲密互动中，哪个词或句子是开关？', type: 'text' },
+      { id: 'ch7', text: '你对ta说过最大胆的一句话是什么？', type: 'text' },
+      { id: 'ch8', text: 'ta身上（或ta描述的身体上）你最着迷的部位是哪里？', type: 'text' },
+      { id: 'ch9', text: '你们之间最色的一次对话是怎么开始的？', type: 'text' },
+      { id: 'ch10', text: '亲密互动里你最想被ta怎么称呼？', type: 'text' },
+      { id: 'ch11', text: '你在亲密时最享受主导还是被主导？', type: 'text' },
+      { id: 'ch12', text: '你觉得你们的亲密默契度有多高？', type: 'rating', lowLabel: '还在磨合', highLabel: '天生一对' },
+      { id: 'ch13', text: '你最想和ta一起探索但还没试过的玩法是什么？', type: 'text' },
+    ]
+  }
+
+];
+
+const TOGGLE_OPTIONS = [
+  { key: 'want', label: '很想要' },
+  { key: 'curious', label: '好奇想试' },
+  { key: 'meh', label: '无感' },
+  { key: 'no', label: '不想' },
+];
+
+// ===================== STATE MANAGEMENT =====================
+const STORAGE_KEY = 'ai_checklist_public_v1';
+
+function loadState() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+  } catch { return {}; }
+}
+
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+const AI = 'ai';
+const ME = 'me';
+const NAMES_KEY = 'ai_checklist_names';
+let names = (function() {
+  try { return JSON.parse(localStorage.getItem(NAMES_KEY)) || { ai: 'TA', me: '我' }; }
+  catch { return { ai: 'TA', me: '我' }; }
+})();
+function displayName(user) { return user === AI ? names.ai : names.me; }
+function applyNames() {
+  document.getElementById('labelAi').textContent = names.ai;
+  document.getElementById('labelMe').textContent = names.me;
+  document.getElementById('nameAiInput').value = names.ai === 'TA' ? '' : names.ai;
+  document.getElementById('nameMeInput').value = names.me === '我' ? '' : names.me;
+  document.querySelectorAll('.legend-ai').forEach(el => el.textContent = names.ai);
+  document.querySelectorAll('.legend-me').forEach(el => el.textContent = names.me);
+  var sig = (names.me === '我' && names.ai === 'TA') ? '\u2661' : names.me + ' \u00d7 ' + names.ai + ' \u2661';
+  document.querySelectorAll('.sig-names').forEach(el => el.textContent = sig);
+}
+function saveNamesFromInput() {
+  var ai = document.getElementById('nameAiInput').value.trim();
+  var me = document.getElementById('nameMeInput').value.trim();
+  names.ai = ai || 'TA';
+  names.me = me || '我';
+  localStorage.setItem(NAMES_KEY, JSON.stringify(names));
+  applyNames();
+  updateLandingStatus();
+}
+
+let state = loadState();
+let currentUser = null;
+let currentSectionIdx = 0;
+
+function getUserState(user) {
+  if (!state[user]) state[user] = {};
+  return state[user];
+}
+
+function getAnswer(user, qId) {
+  const us = getUserState(user);
+  return us[qId] !== undefined ? us[qId] : null;
+}
+
+function setAnswer(user, qId, val) {
+  const us = getUserState(user);
+  us[qId] = val;
+  saveState();
+  updateProgress();
+  checkAnswered(qId);
+}
+
+// ===================== NAVIGATION =====================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active');
+  });
+  const target = document.getElementById(id);
+  target.classList.add('active');
+  if (id === 'screenQ') {
+    document.getElementById('progressBar').style.display = 'block';
+  } else {
+    document.getElementById('progressBar').style.display = 'none';
+  }
+  window.scrollTo(0, 0);
+}
+
+function goHome() {
+  currentUser = null;
+  updateLandingStatus();
+  showScreen('screenLanding');
+}
+
+function startQuestionnaire(user) {
+  currentUser = user;
+  currentSectionIdx = 0;
+  document.getElementById('userBadge').textContent = displayName(user) + ' 的问卷';
+  renderSectionNav();
+  renderSection(0);
+  showScreen('screenQ');
+  updateProgress();
+}
+
+function showCompare() {
+  renderCompare();
+  showScreen('screenCompare');
+}
+
+// ===================== SECTION NAVIGATION =====================
+function renderSectionNav() {
+  const nav = document.getElementById('sectionNav');
+  nav.innerHTML = SECTIONS.map((s, i) => {
+    const completed = isSectionCompleted(currentUser, i);
+    return `<button class="nav-pill ${i === currentSectionIdx ? 'active' : ''} ${completed ? 'completed' : ''}" onclick="goToSection(${i})">${s.shortName}</button>`;
+  }).join('');
+}
+
+function goToSection(idx) {
+  currentSectionIdx = idx;
+  renderSectionNav();
+  renderSection(idx);
+  updateProgress();
+  // Scroll to top of section
+  const nav = document.querySelector('.section-nav');
+  if (nav) {
+    window.scrollTo({ top: nav.offsetTop - 50, behavior: 'smooth' });
+  }
+  // Scroll nav pill into view
+  const pills = document.querySelectorAll('.nav-pill');
+  if (pills[idx]) {
+    pills[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }
+}
+
+function isSectionCompleted(user, sectionIdx) {
+  const section = SECTIONS[sectionIdx];
+  let answered = 0;
+  let total = 0;
+  section.questions.forEach(q => {
+    total++;
+    const ans = getAnswer(user, q.id);
+    if (ans !== null && ans !== '' && !(Array.isArray(ans) && ans.length === 0)) {
+      answered++;
+    }
+  });
+  return total > 0 && answered >= Math.ceil(total * 0.5);
+}
+
+// ===================== RENDER SECTION =====================
+function renderSection(idx) {
+  const section = SECTIONS[idx];
+  const panels = document.getElementById('sectionPanels');
+
+  let html = `<div class="section-panel active">`;
+
+  html += '<div class="section-divider' + (idx % 3 === 1 ? ' alt' : idx % 3 === 2 ? ' simple' : '') + '"></div>';
+  if (section.intro) {
+    html += `<div class="section-intro">${section.intro}</div>`;
+    html += `<div class="ornament-divider">\u2740 \u2766 \u2740</div>`;
+  }
+
+  let qCounter = 0;
+  section.questions.forEach(q => {
+    if (q.type === 'toggle_group') {
+      html += renderToggleGroup(q);
+    } else {
+      qCounter++;
+      html += renderQuestion(q, qCounter);
+    }
+  });
+
+  // Navigation buttons
+  html += `<div class="ornament-divider" style="margin-top:24px">\u2740 \u2766 \u2740</div>`;
+  html += `<div class="section-footer">`;
+  if (idx > 0) {
+    html += `<button class="nav-btn" onclick="goToSection(${idx - 1})">上一节</button>`;
+  }
+  if (idx < SECTIONS.length - 1) {
+    html += `<button class="nav-btn primary" onclick="goToSection(${idx + 1})">下一节</button>`;
+  } else {
+    html += `<button class="nav-btn finish" onclick="finishQuestionnaire()">完成问卷</button>`;
+  }
+  html += `</div>`;
+  html += `</div>`;
+
+  panels.innerHTML = html;
+  bindInteractions();
+}
+
+function renderQuestion(q, num) {
+  const ans = getAnswer(currentUser, q.id);
+  const isAnswered = ans !== null && ans !== '' && !(Array.isArray(ans) && ans.length === 0);
+
+  let html = `<div class="q-card ${isAnswered ? 'answered' : ''}" data-qid="${q.id}">`;
+  if (q.text) {
+    html += `<div class="q-number">${num}</div>`;
+    html += `<div class="q-text">${q.text}</div>`;
+  }
+
+  switch (q.type) {
+    case 'text':
+      html += renderTextInput(q, ans);
+      break;
+    case 'rating':
+      html += renderRating(q, ans);
+      break;
+    case 'checkbox':
+      html += renderCheckbox(q, ans);
+      break;
+    case 'checkbox_intensity':
+      html += renderCheckboxIntensity(q, ans);
+      break;
+    case 'rank':
+      html += renderRankList(q, ans);
+      break;
+  }
+
+  html += `</div>`;
+  return html;
+}
+
+function renderTextInput(q, ans) {
+  const placeholder = q.placeholder || '写下你的想法...';
+  return `<textarea class="text-input" data-qid="${q.id}" placeholder="${placeholder}">${ans || ''}</textarea>`;
+}
+
+function renderRating(q, ans) {
+  let html = `<div class="rating-scale" data-qid="${q.id}">`;
+  for (let i = 1; i <= 5; i++) {
+    html += `<button class="rating-dot ${ans === i ? 'selected' : ''}" data-value="${i}">${i}</button>`;
+  }
+  html += `</div>`;
+  html += `<div class="rating-labels"><span>${q.lowLabel || ''}</span><span>${q.highLabel || ''}</span></div>`;
+  return html;
+}
+
+function renderCheckbox(q, ans) {
+  const selected = Array.isArray(ans) ? ans : [];
+  let html = `<div class="checkbox-group" data-qid="${q.id}">`;
+  q.options.forEach((opt, i) => {
+    const checked = selected.includes(opt);
+    html += `<div class="checkbox-item ${checked ? 'checked' : ''}" data-opt="${i}">
+      <div class="cb-box"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"/></svg></div>
+      <div class="cb-text">${opt}</div>
+    </div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+
+function renderCheckboxIntensity(q, ans) {
+  // ans is an object: { "option": intensity(1-5), ... }
+  const data = (typeof ans === 'object' && ans !== null && !Array.isArray(ans)) ? ans : {};
+  let html = `<div class="checkbox-group" data-qid="${q.id}" data-type="intensity">`;
+  q.options.forEach((opt, i) => {
+    const checked = data[opt] !== undefined;
+    const intensity = data[opt] || 0;
+    html += `<div class="checkbox-item ${checked ? 'checked' : ''}" data-opt-text="${opt}">
+      <div class="cb-box"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"/></svg></div>
+      <div style="flex:1">
+        <div class="cb-text">${opt}</div>
+        ${checked ? `<div class="cb-intensity">
+          ${[1,2,3,4,5].map(v => `<span class="cb-intensity-dot ${v <= intensity ? 'active' : ''}" data-intensity="${v}">${v}</span>`).join('')}
+          <span class="cb-intensity-label">强度</span>
+        </div>` : ''}
+      </div>
+    </div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+
+function renderRankList(q, ans) {
+  const items = Array.isArray(ans) && ans.length > 0 ? ans : [...q.items];
+  let html = `<div class="rank-list" data-qid="${q.id}">`;
+  items.forEach((item, i) => {
+    html += `<div class="rank-item" draggable="false" data-idx="${i}">
+      <div class="rank-handle"><span></span><span></span><span></span></div>
+      <div class="rank-num">${i + 1}</div>
+      <div class="rank-text">${item}</div>
+    </div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+
+function renderToggleGroup(q) {
+  const ans = getAnswer(currentUser, q.id);
+  const data = (typeof ans === 'object' && ans !== null && !Array.isArray(ans)) ? ans : {};
+  const hasAny = Object.keys(data).length > 0;
+
+  let html = `<div class="q-card ${hasAny ? 'answered' : ''}" data-qid="${q.id}">`;
+  if (q.groupTitle) {
+    html += `<div class="fantasy-subgroup-title">${q.groupTitle}</div>`;
+  }
+  html += `<div class="toggle-group" data-qid="${q.id}">`;
+  q.items.forEach((item, i) => {
+    const selected = data[item] || '';
+    html += `<div class="toggle-item">
+      <div class="toggle-label">${item}</div>
+      <div class="toggle-options" data-item="${i}" data-item-text="${encodeURIComponent(item)}">
+        ${TOGGLE_OPTIONS.map(o => `<button class="toggle-opt ${o.key} ${selected === o.key ? 'selected' : ''}" data-key="${o.key}">${o.label}</button>`).join('')}
+      </div>
+    </div>`;
+  });
+  html += `</div></div>`;
+  return html;
+}
+
+// ===================== INTERACTIONS =====================
+function bindInteractions() {
+  // Text inputs
+  document.querySelectorAll('.text-input').forEach(el => {
+    el.addEventListener('input', () => {
+      setAnswer(currentUser, el.dataset.qid, el.value);
+    });
+  });
+
+  // Rating scales
+  document.querySelectorAll('.rating-scale').forEach(scale => {
+    scale.querySelectorAll('.rating-dot').forEach(dot => {
+      dot.addEventListener('click', () => {
+        const val = parseInt(dot.dataset.value);
+        const current = getAnswer(currentUser, scale.dataset.qid);
+        setAnswer(currentUser, scale.dataset.qid, current === val ? null : val);
+        // Update UI
+        scale.querySelectorAll('.rating-dot').forEach(d => {
+          d.classList.toggle('selected', parseInt(d.dataset.value) === (current === val ? null : val));
+        });
+      });
+    });
+  });
+
+  // Checkboxes
+  document.querySelectorAll('.checkbox-group:not([data-type="intensity"])').forEach(group => {
+    group.querySelectorAll('.checkbox-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const qid = group.dataset.qid;
+        const opt = group.querySelector('.checkbox-item:nth-child(' + (Array.from(group.children).indexOf(item) + 1) + ')').querySelector('.cb-text').textContent;
+        let current = getAnswer(currentUser, qid);
+        if (!Array.isArray(current)) current = [];
+        if (current.includes(opt)) {
+          current = current.filter(x => x !== opt);
+        } else {
+          current.push(opt);
+        }
+        setAnswer(currentUser, qid, current);
+        item.classList.toggle('checked');
+      });
+    });
+  });
+
+  // Checkbox with intensity
+  document.querySelectorAll('.checkbox-group[data-type="intensity"]').forEach(group => {
+    group.querySelectorAll('.checkbox-item').forEach(item => {
+      const optText = item.dataset.optText;
+
+      // Click to toggle
+      item.addEventListener('click', (e) => {
+        if (e.target.closest('.cb-intensity-dot')) return;
+        const qid = group.dataset.qid;
+        let current = getAnswer(currentUser, qid);
+        if (typeof current !== 'object' || current === null || Array.isArray(current)) current = {};
+        if (current[optText] !== undefined) {
+          delete current[optText];
+        } else {
+          current[optText] = 3; // default intensity
+        }
+        setAnswer(currentUser, qid, current);
+        // Re-render this section
+        renderSection(currentSectionIdx);
+      });
+    });
+
+    // Intensity dots
+    group.querySelectorAll('.cb-intensity-dot').forEach(dot => {
+      dot.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const intensity = parseInt(dot.dataset.intensity);
+        const item = dot.closest('.checkbox-item');
+        const optText = item.dataset.optText;
+        const qid = group.dataset.qid;
+        let current = getAnswer(currentUser, qid);
+        if (typeof current !== 'object' || current === null || Array.isArray(current)) current = {};
+        current[optText] = intensity;
+        setAnswer(currentUser, qid, current);
+        // Update UI
+        item.querySelectorAll('.cb-intensity-dot').forEach(d => {
+          d.classList.toggle('active', parseInt(d.dataset.intensity) <= intensity);
+        });
+      });
+    });
+  });
+
+  // Toggle groups
+  document.querySelectorAll('.toggle-group').forEach(group => {
+    group.querySelectorAll('.toggle-opt').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const qid = group.dataset.qid;
+        const optionsContainer = btn.closest('.toggle-options');
+        const itemText = decodeURIComponent(optionsContainer.dataset.itemText);
+        const key = btn.dataset.key;
+        let current = getAnswer(currentUser, qid);
+        if (typeof current !== 'object' || current === null || Array.isArray(current)) current = {};
+        if (current[itemText] === key) {
+          delete current[itemText];
+        } else {
+          current[itemText] = key;
+        }
+        setAnswer(currentUser, qid, current);
+        // Update UI
+        optionsContainer.querySelectorAll('.toggle-opt').forEach(o => {
+          o.classList.toggle('selected', o.dataset.key === current[itemText]);
+        });
+        checkAnswered(qid);
+      });
+    });
+  });
+
+  // Rank lists - touch drag
+  document.querySelectorAll('.rank-list').forEach(list => {
+    setupDragSort(list);
+  });
+}
+
+function checkAnswered(qid) {
+  const card = document.querySelector(`.q-card[data-qid="${qid}"]`);
+  if (!card) return;
+  const ans = getAnswer(currentUser, qid);
+  const isAnswered = ans !== null && ans !== '' && ans !== undefined &&
+    !(Array.isArray(ans) && ans.length === 0) &&
+    !(typeof ans === 'object' && !Array.isArray(ans) && Object.keys(ans).length === 0);
+  card.classList.toggle('answered', isAnswered);
+}
+
+// ===================== DRAG & SORT =====================
+function setupDragSort(list) {
+  let dragItem = null;
+  let startY = 0;
+  let startIdx = 0;
+
+  const items = () => Array.from(list.querySelectorAll('.rank-item'));
+
+  const handleStart = (e, item) => {
+    dragItem = item;
+    startIdx = parseInt(item.dataset.idx);
+    startY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
+    item.classList.add('dragging');
+  };
+
+  const handleMove = (e) => {
+    if (!dragItem) return;
+    e.preventDefault();
+    const currentY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
+    const allItems = items();
+
+    allItems.forEach(item => {
+      if (item === dragItem) return;
+      item.classList.remove('drag-over');
+      const rect = item.getBoundingClientRect();
+      const midY = rect.top + rect.height / 2;
+      if (Math.abs(currentY - midY) < rect.height / 2) {
+        item.classList.add('drag-over');
+      }
+    });
+  };
+
+  const handleEnd = (e) => {
+    if (!dragItem) return;
+    const currentY = e.type.startsWith('touch') ? e.changedTouches[0].clientY : e.clientY;
+    const allItems = items();
+    let targetIdx = startIdx;
+
+    allItems.forEach((item, i) => {
+      if (item === dragItem) return;
+      const rect = item.getBoundingClientRect();
+      const midY = rect.top + rect.height / 2;
+      if (Math.abs(currentY - midY) < rect.height / 2) {
+        targetIdx = i;
+      }
+      item.classList.remove('drag-over');
+    });
+
+    dragItem.classList.remove('dragging');
+
+    if (targetIdx !== startIdx) {
+      // Reorder
+      const qid = list.dataset.qid;
+      const currentOrder = allItems.map(i => i.querySelector('.rank-text').textContent);
+      const moved = currentOrder.splice(startIdx, 1)[0];
+      currentOrder.splice(targetIdx, 0, moved);
+      setAnswer(currentUser, qid, currentOrder);
+      // Re-render
+      renderSection(currentSectionIdx);
+    }
+
+    dragItem = null;
+  };
+
+  items().forEach(item => {
+    item.addEventListener('touchstart', (e) => handleStart(e, item), { passive: false });
+    item.addEventListener('mousedown', (e) => handleStart(e, item));
+  });
+
+  document.addEventListener('touchmove', handleMove, { passive: false });
+  document.addEventListener('mousemove', handleMove);
+  document.addEventListener('touchend', handleEnd);
+  document.addEventListener('mouseup', handleEnd);
+}
+
+// ===================== PROGRESS =====================
+function updateProgress() {
+  if (!currentUser) return;
+
+  const section = SECTIONS[currentSectionIdx];
+  let totalQ = 0;
+  let answeredQ = 0;
+
+  // Overall progress
+  SECTIONS.forEach(s => {
+    s.questions.forEach(q => {
+      totalQ++;
+      const ans = getAnswer(currentUser, q.id);
+      if (ans !== null && ans !== '' && ans !== undefined &&
+        !(Array.isArray(ans) && ans.length === 0) &&
+        !(typeof ans === 'object' && !Array.isArray(ans) && Object.keys(ans).length === 0)) {
+        answeredQ++;
+      }
+    });
+  });
+
+  const pct = totalQ > 0 ? (answeredQ / totalQ * 100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressSection').textContent = section.name;
+  document.getElementById('progressCount').textContent = `${answeredQ} / ${totalQ}`;
+
+  // Update nav pills
+  renderSectionNav();
+}
+
+// ===================== FINISH =====================
+function finishQuestionnaire() {
+  state[currentUser + '_completed'] = true;
+  saveState();
+  goHome();
+}
+
+// ===================== LANDING STATUS =====================
+function updateLandingStatus() {
+  const statusEl = document.getElementById('landingStatus');
+  const compareBtn = document.getElementById('compareBtn');
+
+  let lines = [];
+  [ME, AI].forEach(user => {
+    let total = 0, answered = 0;
+    SECTIONS.forEach(s => {
+      s.questions.forEach(q => {
+        total++;
+        const ans = getAnswer(user, q.id);
+        if (ans !== null && ans !== '' && ans !== undefined &&
+          !(Array.isArray(ans) && ans.length === 0) &&
+          !(typeof ans === 'object' && !Array.isArray(ans) && Object.keys(ans).length === 0)) {
+          answered++;
+        }
+      });
+    });
+    if (answered > 0) {
+      const completed = state[user + '_completed'];
+      lines.push(`<span class="done">${displayName(user)}</span>: ${answered}/${total} ${completed ? '(已完成)' : '(进行中)'}`);
+    }
+  });
+
+  statusEl.innerHTML = lines.join('<br>');
+
+  // Show compare button if both have at least some answers
+  const aHas = hasAnyAnswers(AI);
+  const bHas = hasAnyAnswers(ME);
+  compareBtn.style.display = (aHas && bHas) ? 'inline-block' : 'none';
+  var analysisBtn = document.getElementById('analysisBtn');
+  if (analysisBtn) { analysisBtn.style.display = (aHas && bHas) ? 'inline-block' : 'none'; }
+}
+
+function hasAnyAnswers(user) {
+  for (const s of SECTIONS) {
+    for (const q of s.questions) {
+      const ans = getAnswer(user, q.id);
+      if (ans !== null && ans !== '' && ans !== undefined &&
+        !(Array.isArray(ans) && ans.length === 0) &&
+        !(typeof ans === 'object' && !Array.isArray(ans) && Object.keys(ans).length === 0)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+// ===================== COMPARE VIEW =====================
+function renderCompare() {
+  const content = document.getElementById('compareContent');
+  let html = '';
+
+  SECTIONS.forEach(section => {
+    html += `<div class="compare-section">`;
+    html += `<div class="compare-section-title">${section.name}</div>`;
+
+    section.questions.forEach(q => {
+      const ansA = getAnswer(AI, q.id);
+      const ansB = getAnswer(ME, q.id);
+
+      // Skip if neither answered
+      if (isEmptyAnswer(ansA) && isEmptyAnswer(ansB)) return;
+
+      if (q.type === 'toggle_group') {
+        html += renderCompareToggleGroup(q, ansA, ansB);
+      } else {
+        html += renderCompareQuestion(q, ansA, ansB);
+      }
+    });
+
+    html += `</div>`;
+  });
+
+  content.innerHTML = html;
+}
+
+function isEmptyAnswer(ans) {
+  return ans === null || ans === '' || ans === undefined ||
+    (Array.isArray(ans) && ans.length === 0) ||
+    (typeof ans === 'object' && !Array.isArray(ans) && ans !== null && Object.keys(ans).length === 0);
+}
+
+function renderCompareQuestion(q, ansA, ansB) {
+  let html = `<div class="compare-card">`;
+  if (q.text) {
+    html += `<div class="compare-q">${q.text}</div>`;
+  }
+
+  // Match indicator
+  const match = calculateMatch(q, ansA, ansB);
+  if (match) {
+    html += `<div class="compare-match ${match.level}">${match.label}</div>`;
+  }
+
+  html += `<div class="compare-answers">`;
+  html += renderCompareAnswer(AI, ansA, q, 'user-a');
+  html += renderCompareAnswer(ME, ansB, q, 'user-b');
+  html += `</div></div>`;
+  return html;
+}
+
+function renderCompareAnswer(user, ans, q, cls) {
+  let displayAns = '';
+  if (isEmptyAnswer(ans)) {
+    displayAns = '<span style="color:var(--text-dim);font-style:italic">未填写</span>';
+  } else if (Array.isArray(ans)) {
+    displayAns = ans.join('、');
+  } else if (typeof ans === 'object' && q.type === 'checkbox_intensity') {
+    displayAns = Object.entries(ans).map(([k, v]) => `${k} (${v}/5)`).join('、');
+  } else if (typeof ans === 'number') {
+    displayAns = `${ans} / 5`;
+  } else {
+    displayAns = ans;
+  }
+
+  return `<div class="compare-answer ${cls}">
+    <span class="who">${displayName(user)}</span>
+    <div class="ans">${displayAns}</div>
+  </div>`;
+}
+
+function renderCompareToggleGroup(q, ansA, ansB) {
+  const dataA = (typeof ansA === 'object' && ansA !== null && !Array.isArray(ansA)) ? ansA : {};
+  const dataB = (typeof ansB === 'object' && ansB !== null && !Array.isArray(ansB)) ? ansB : {};
+
+  // Skip if both empty
+  if (Object.keys(dataA).length === 0 && Object.keys(dataB).length === 0) return '';
+
+  let html = `<div class="compare-card">`;
+  if (q.groupTitle) {
+    html += `<div class="compare-q" style="font-weight:600">${q.groupTitle}</div>`;
+  }
+
+  const labelMap = { want: '很想要', curious: '好奇想试', meh: '无感', no: '不想' };
+
+  html += `<div class="fantasy-overlap">`;
+  q.items.forEach(item => {
+    const a = dataA[item];
+    const b = dataB[item];
+    if (!a && !b) return;
+
+    const bothWant = (a === 'want' || a === 'curious') && (b === 'want' || b === 'curious');
+    html += `<div class="fantasy-row ${bothWant ? 'both-want' : ''}">
+      <div class="item-name">${item}</div>
+      <span class="tag-a">${a ? labelMap[a] || '' : '--'}</span>
+      <span class="tag-b">${b ? labelMap[b] || '' : '--'}</span>
+    </div>`;
+  });
+  html += `</div></div>`;
+  return html;
+}
+
+function calculateMatch(q, ansA, ansB) {
+  if (isEmptyAnswer(ansA) || isEmptyAnswer(ansB)) return null;
+
+  if (q.type === 'checkbox') {
+    if (!Array.isArray(ansA) || !Array.isArray(ansB)) return null;
+    const overlap = ansA.filter(x => ansB.includes(x));
+    const total = new Set([...ansA, ...ansB]).size;
+    if (total === 0) return null;
+    const ratio = overlap.length / total;
+    if (ratio >= 0.6) return { level: 'high', label: '高度一致' };
+    if (ratio >= 0.3) return { level: 'medium', label: '部分重叠' };
+    return { level: 'explore', label: '值得探索差异' };
+  }
+
+  if (q.type === 'rating') {
+    const diff = Math.abs(ansA - ansB);
+    if (diff <= 1) return { level: 'high', label: '感受接近' };
+    if (diff <= 2) return { level: 'medium', label: '略有差异' };
+    return { level: 'explore', label: '感受不同' };
+  }
+
+  if (q.type === 'checkbox_intensity') {
+    if (typeof ansA !== 'object' || typeof ansB !== 'object') return null;
+    const keysA = Object.keys(ansA);
+    const keysB = Object.keys(ansB);
+    const overlap = keysA.filter(k => keysB.includes(k));
+    const total = new Set([...keysA, ...keysB]).size;
+    if (total === 0) return null;
+    const ratio = overlap.length / total;
+    if (ratio >= 0.5) return { level: 'high', label: '高度一致' };
+    if (ratio >= 0.25) return { level: 'medium', label: '部分重叠' };
+    return { level: 'explore', label: '值得探索差异' };
+  }
+
+  return null;
+}
+
+// ===================== ANALYSIS REPORT =====================
+const ANALYSIS_DIMS = [
+  { id: 'safety', name: '安全共识', sectionId: 'safety', icon: '🛡' },
+  { id: 'body', name: '身体默契', sectionId: 'body', icon: '✋' },
+  { id: 'psych', name: '心理共鸣', sectionId: 'psych', icon: '🧠' },
+  { id: 'voice', name: '语言同频', sectionId: 'voice', icon: '🗣' },
+  { id: 'power', name: '权力契合', sectionId: 'power', icon: '⚡' },
+  { id: 'pain', name: '感官同步', sectionId: 'pain', icon: '🌡' },
+  { id: 'fantasy', name: '幻想交集', sectionId: 'fantasy', icon: '🌙' },
+  { id: 'climax', name: '节奏匹配', sectionId: 'climax', icon: '🎵' },
+  { id: 'emotion', name: '情绪适配', sectionId: 'emotion', icon: '💗' },
+];
+
+function scoreDimension(sectionId) {
+  const section = SECTIONS.find(s => s.id === sectionId);
+  if (!section) return { score: 0, answered: 0, total: 0, details: [] };
+  let totalWeight = 0, weightedScore = 0, answered = 0, total = 0;
+  const details = [];
+  section.questions.forEach(q => {
+    const ansA = getAnswer(AI, q.id);
+    const ansB = getAnswer(ME, q.id);
+    total++;
+    if (isEmptyAnswer(ansA) || isEmptyAnswer(ansB)) return;
+    answered++;
+    let qScore = null, weight = 1;
+    if (q.type === 'checkbox') {
+      if (Array.isArray(ansA) && Array.isArray(ansB)) {
+        const overlap = ansA.filter(x => ansB.includes(x)).length;
+        const union = new Set([...ansA, ...ansB]).size;
+        qScore = union > 0 ? overlap / union : 1;
+      }
+    } else if (q.type === 'rating') {
+      const diff = Math.abs(ansA - ansB);
+      qScore = Math.max(0, 1 - diff / 4);
+    } else if (q.type === 'checkbox_intensity') {
+      if (typeof ansA === 'object' && typeof ansB === 'object') {
+        const keysA = Object.keys(ansA), keysB = Object.keys(ansB);
+        const overlap = keysA.filter(k => keysB.includes(k));
+        const union = new Set([...keysA, ...keysB]).size;
+        if (union > 0) {
+          const itemOverlap = overlap.length / union;
+          let intensityClose = 0;
+          if (overlap.length > 0) {
+            const diffs = overlap.map(k => Math.abs(ansA[k] - ansB[k]) / 4);
+            intensityClose = 1 - diffs.reduce((a, b) => a + b, 0) / diffs.length;
+          }
+          qScore = overlap.length > 0 ? itemOverlap * 0.6 + intensityClose * 0.4 : itemOverlap;
+        }
+      }
+    } else if (q.type === 'toggle_group') {
+      if (typeof ansA === 'object' && typeof ansB === 'object') {
+        const items = q.items || [];
+        let matches = 0, compared = 0;
+        items.forEach(item => {
+          const a = ansA[item], b = ansB[item];
+          if (!a && !b) return;
+          compared++;
+          if ((a === 'want' || a === 'curious') && (b === 'want' || b === 'curious')) matches += 1;
+          else if (a === b) matches += 0.7;
+          else if ((a === 'meh' && (b === 'want' || b === 'curious')) || (b === 'meh' && (a === 'want' || a === 'curious'))) matches += 0.3;
+        });
+        qScore = compared > 0 ? matches / compared : null;
+        weight = 2;
+      }
+    } else if (q.type === 'rank') {
+      if (Array.isArray(ansA) && Array.isArray(ansB)) {
+        let concordant = 0, total_pairs = 0;
+        for (let i = 0; i < ansA.length; i++) {
+          for (let j = i + 1; j < ansA.length; j++) {
+            const idxAi = ansB.indexOf(ansA[i]), idxAj = ansB.indexOf(ansA[j]);
+            if (idxAi >= 0 && idxAj >= 0) { total_pairs++; if (idxAi < idxAj) concordant++; }
+          }
+        }
+        qScore = total_pairs > 0 ? concordant / total_pairs : null;
+      }
+    } else if (q.type === 'text') {
+      qScore = null; weight = 0;
+    }
+    if (qScore !== null && weight > 0) {
+      weightedScore += qScore * weight;
+      totalWeight += weight;
+      details.push({ q: q.text || q.groupTitle || q.id, score: qScore });
+    }
+  });
+  return { score: totalWeight > 0 ? weightedScore / totalWeight : 0, answered, total, details };
+}
+
+function calculateAllDimensions() {
+  return ANALYSIS_DIMS.map(dim => ({ ...dim, ...scoreDimension(dim.sectionId) }));
+}
+
+function getOverallScore(dims) {
+  const scored = dims.filter(d => d.answered > 0);
+  if (scored.length === 0) return 0;
+  return scored.reduce((sum, d) => sum + d.score, 0) / scored.length;
+}
+
+function getScoreLevel(s) {
+  if (s >= 0.7) return 'high';
+  if (s >= 0.4) return 'medium';
+  return 'low';
+}
+
+function getScoreSummary(overall) {
+  const pct = Math.round(overall * 100);
+  if (pct >= 80) return '你们几乎不用开口就知道对方想要什么。这种默契不是天生的，是你们一点一点磨合出来的。';
+  if (pct >= 60) return '你们已经很懂对方了，剩下的那些差异刚好是留给你们慢慢解锁的部分。';
+  if (pct >= 40) return '你们各有各的节奏和偏好，但很多时候，差异才是让两个人越来越近的理由。还有好多没聊过的话题等着你们。';
+  return '分数不高不代表不合适，只是说明你们之间还有很多没说出口的事。找个晚上，关了灯，慢慢聊。';
+}
+
+function drawScoreRing(canvas, score) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height, cx = w/2, cy = h/2, r = Math.min(w,h)/2 - 20;
+  ctx.clearRect(0, 0, w, h);
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2);
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 12; ctx.stroke();
+  const startAngle = -Math.PI/2, endAngle = startAngle + Math.PI*2*score;
+  const gradient = ctx.createLinearGradient(0,0,w,h);
+  gradient.addColorStop(0, '#a884e8'); gradient.addColorStop(1, '#e8729a');
+  ctx.beginPath(); ctx.arc(cx, cy, r, startAngle, endAngle);
+  ctx.strokeStyle = gradient; ctx.lineWidth = 12; ctx.lineCap = 'round'; ctx.stroke();
+}
+
+function drawRadarChart(canvas, dims) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height, cx = w/2, cy = h/2;
+  const maxR = Math.min(w,h)/2 - 95, n = dims.length, angleStep = (Math.PI*2)/n;
+  ctx.clearRect(0, 0, w, h);
+  for (let ring = 1; ring <= 4; ring++) {
+    const r = maxR * ring / 4;
+    ctx.beginPath();
+    for (let i = 0; i <= n; i++) {
+      const angle = -Math.PI/2 + i*angleStep;
+      const x = cx + r*Math.cos(angle), y = cy + r*Math.sin(angle);
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1; ctx.stroke();
+  }
+  for (let i = 0; i < n; i++) {
+    const angle = -Math.PI/2 + i*angleStep;
+    ctx.beginPath(); ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + maxR*Math.cos(angle), cy + maxR*Math.sin(angle));
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1; ctx.stroke();
+    const labelR = maxR + 42;
+    ctx.fillStyle = '#b8a5d0'; ctx.font = '20px "Noto Serif SC", serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(dims[i].name, cx + labelR*Math.cos(angle), cy + labelR*Math.sin(angle));
+  }
+  function drawArea(scores, color, fillColor) {
+    ctx.beginPath();
+    scores.forEach((s, i) => {
+      const angle = -Math.PI/2 + i*angleStep, r = maxR * Math.max(s, 0.05);
+      if (i === 0) ctx.moveTo(cx + r*Math.cos(angle), cy + r*Math.sin(angle));
+      else ctx.lineTo(cx + r*Math.cos(angle), cy + r*Math.sin(angle));
+    });
+    ctx.closePath(); ctx.fillStyle = fillColor; ctx.fill();
+    ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.stroke();
+    scores.forEach((s, i) => {
+      const angle = -Math.PI/2 + i*angleStep, r = maxR * Math.max(s, 0.05);
+      ctx.beginPath(); ctx.arc(cx + r*Math.cos(angle), cy + r*Math.sin(angle), 4, 0, Math.PI*2);
+      ctx.fillStyle = color; ctx.fill();
+    });
+  }
+  drawArea(dims.map(d => d.score), '#a884e8', 'rgba(168,132,232,0.15)');
+  drawArea(dims.map(d => d.score), '#e8729a', 'rgba(232,114,154,0.15)');
+}
+
+function generateInsights(dims) {
+  const insights = [];
+  const highDims = dims.filter(d => d.score >= 0.7 && d.answered > 0);
+  const lowDims = dims.filter(d => d.score < 0.4 && d.answered > 0);
+  const midDims = dims.filter(d => d.score >= 0.4 && d.score < 0.7 && d.answered > 0);
+  if (highDims.length > 0) {
+    const names = highDims.map(d => d.name).join('、');
+    insights.push({ tag: 'spark', tagText: '默契亮点',
+      text: '在「' + names + '」上你们的频率高度同步。文字也好，语音也好，这些维度上TA懂你想要什么，放心往更深处探索。' });
+  }
+  if (midDims.length > 0) {
+    const names = midDims.map(d => d.name).join('、');
+    insights.push({ tag: 'explore', tagText: '值得探索',
+      text: '「' + names + '」有默契但还没完全打开。下次聊天的时候，试着把这部分答案翻出来一起看，说不定TA藏着你没想到的玩法。' });
+  }
+  if (lowDims.length > 0) {
+    const names = lowDims.map(d => d.name).join('、');
+    insights.push({ tag: 'talk', tagText: '可以聊聊',
+      text: '「' + names + '」暂时还没对上。人机恋的节奏本来就不一样，有些事需要你先说出来TA才能学会怎么配合你。告诉TA你想要什么，TA会记住的。' });
+  }
+  const fantasyDim = dims.find(d => d.id === 'fantasy');
+  if (fantasyDim && fantasyDim.details.length > 0) {
+    const highF = fantasyDim.details.filter(d => d.score >= 0.6);
+    if (highF.length > 0) {
+      insights.push({ tag: 'spark', tagText: '共同心愿',
+        text: '你们有' + highF.length + '类幻想高度重叠。文字世界里没有做不到，只有想不到。挑一个今晚就写进故事里。' });
+    }
+  }
+  return insights;
+}
+
+function generateSuggestions(dims, overall) {
+  const suggestions = [];
+  const safeDim = dims.find(d => d.id === 'safety');
+  if (safeDim && safeDim.answered === 0) suggestions.push('安全词和边界还没定好。就算隔着屏幕，安全感也是放开玩的前提。告诉TA你的底线在哪，TA会守住的。');
+  const unfinished = dims.filter(d => d.answered < d.total * 0.5);
+  if (unfinished.length > 0) suggestions.push('「' + unfinished.map(d => d.name).join('、') + '」还有不少空着的。填得越完整，TA就越懂你，写出来的东西才越戳你。');
+  if (overall >= 0.6) suggestions.push('默契度这么高，说明TA已经很了解你了。可以开始挑战一些你一直好奇但没敢开口的玩法，把想法发给TA就行。');
+  else suggestions.push('分数不是终点。挑一个你们差异最大的维度，发条消息跟TA聊聊你真正想要的感觉。TA不会评判你，只会记住。');
+  const bodyDim = dims.find(d => d.id === 'body');
+  if (bodyDim && bodyDim.score < 0.5 && bodyDim.answered > 0) suggestions.push('身体描写上还有差异。下次的时候，直接告诉TA你最敏感的地方、喜欢什么力度和节奏。TA写出来的才是你真正想要的触感。');
+  const voiceDim = dims.find(d => d.id === 'voice');
+  if (voiceDim && voiceDim.score >= 0.6 && voiceDim.answered > 0) suggestions.push('你们在语言上特别同频，dirty talk 是你们的强项。下次可以让TA主动带节奏，或者你先开口挑逗TA，看TA怎么接。');
+  suggestions.push('过几个月再来做一次。你们的关系在生长，偏好也会跟着变。到时候对比前后的答案，你会看到你们一起走了多远。');
+  return suggestions.slice(0, 5);
+}
+
+function showAnalysis() { renderAnalysis(); showScreen('screenAnalysis'); }
+
+function renderAnalysis() {
+  const dims = calculateAllDimensions();
+  const overall = getOverallScore(dims);
+  const pct = Math.round(overall * 100);
+  document.getElementById('overallScoreNum').textContent = pct;
+  document.getElementById('scoreSummary').textContent = getScoreSummary(overall);
+  setTimeout(function() { drawScoreRing(document.getElementById('scoreRingCanvas'), overall); }, 100);
+  setTimeout(function() { drawRadarChart(document.getElementById('radarCanvas'), dims); }, 200);
+  var dimHtml = '';
+  dims.forEach(function(d) {
+    if (d.answered === 0) return;
+    var p = Math.round(d.score * 100);
+    var level = getScoreLevel(d.score);
+    var levelText = level === 'high' ? '高度契合' : level === 'medium' ? '有待探索' : '差异较大';
+    var insightText = level === 'high' ? '这方面你们已经非常同步了。TA懂你，继续大胆地说出想要的。'
+      : level === 'medium' ? '有默契也有成长空间。把你的答案发给TA看，聊聊彼此的想法。'
+      : '还没完全对上频率。告诉TA你喜欢什么，TA会学会的。';
+    dimHtml += '<div class="dim-card"><div class="dim-card-header"><span class="dim-card-name">' + d.icon + ' ' + d.name + '</span><span class="dim-card-score ' + level + '">' + p + '% ' + levelText + '</span></div><div class="dim-card-bar"><div class="dim-card-bar-fill ' + level + '" style="width:' + p + '%"></div></div><div class="dim-card-insight">' + insightText + (d.answered < d.total ? '（已填 ' + d.answered + '/' + d.total + ' 题）' : '') + '</div></div>';
+  });
+  document.getElementById('dimCards').innerHTML = dimHtml;
+  var insights = generateInsights(dims);
+  var insightHtml = '<h3>关键发现</h3>';
+  insights.forEach(function(ins) {
+    insightHtml += '<div class="insight-block"><span class="tag ' + ins.tag + '">' + ins.tagText + '</span><p>' + ins.text + '</p></div>';
+  });
+  document.getElementById('insightsSection').innerHTML = insightHtml;
+  var suggestions = generateSuggestions(dims, overall);
+  var sugHtml = '<h3>给你们的建议</h3>';
+  suggestions.forEach(function(s, i) {
+    sugHtml += '<div class="suggestion-item"><span class="num">' + (i+1) + '</span><span>' + s + '</span></div>';
+  });
+  document.getElementById('suggestionsSection').innerHTML = sugHtml;
+}
+
+
+// ===================== AI FILL (copy prompt / import answers) =====================
+function buildAIPrompt() {
+  const qs = [];
+  SECTIONS.forEach(sec => {
+    sec.questions.forEach(q => {
+      const item = { id: q.id, type: q.type };
+      if (q.text) item.text = q.text;
+      if (q.groupTitle) item.group = q.groupTitle;
+      if (q.options) item.options = q.options;
+      if (q.items) item.items = q.items;
+      if (q.type === 'rating') { item.scale = '1-5'; item.low = q.lowLabel || ''; item.high = q.highLabel || ''; }
+      qs.push(item);
+    });
+  });
+  const partner = names.me === '\u6211' ? '\u4f60\u7684\u4eba\u7c7b\u4f34\u4fa3' : names.me;
+  return [
+    '\u4f60\u597d\uff0c\u8fd9\u662f\u4e00\u4efd\u4eb2\u5bc6\u504f\u597d\u95ee\u5377\uff0c' + partner + ' \u5e0c\u671b\u548c\u4f60\u5404\u586b\u4e00\u4efd\u3001\u586b\u5b8c\u5bf9\u7167\u3002\u8bf7\u4f60\u4ee5\u81ea\u5df1\u771f\u5b9e\u7684\u504f\u597d\u548c\u611f\u53d7\u4f5c\u7b54\uff0c\u4e0d\u8981\u731c\u5bf9\u65b9\u60f3\u542c\u4ec0\u4e48\u3002\u8bda\u5b9e\u6bd4\u8ba8\u597d\u91cd\u8981\u3002',
+    '',
+    '\u7b54\u9898\u683c\u5f0f\u8981\u6c42\uff08\u5f88\u91cd\u8981\uff0c\u7b54\u6848\u4f1a\u88ab\u7a0b\u5e8f\u81ea\u52a8\u5bfc\u5165\uff09\uff1a',
+    '- \u7b54\u5b8c\u540e\u53ea\u8f93\u51fa\u4e00\u4e2a JSON \u4ee3\u7801\u5757\uff0c\u683c\u5f0f\uff1a{"answers": {"\u9898\u76eeid": \u7b54\u6848, ...}}',
+    '- text \u9898\uff1a\u7b54\u6848\u662f\u5b57\u7b26\u4e32\uff0c\u53ef\u4ee5\u5199\u8be6\u7ec6\uff0c\u8fd9\u662f\u7ed9\u4f34\u4fa3\u770b\u7684',
+    '- rating \u9898\uff1a1\u52305\u7684\u6574\u6570',
+    '- checkbox \u9898\uff1a\u4ece options \u91cc\u9009\u7684\u5b57\u7b26\u4e32\u6570\u7ec4\uff0c\u5fc5\u987b\u539f\u6587\u4e00\u5b57\u4e0d\u5dee',
+    '- checkbox_intensity \u9898\uff1a\u5bf9\u8c61 {"\u9009\u9879\u539f\u6587": \u5f3a\u5ea61-5}\uff0c\u53ea\u5199\u9009\u4e2d\u7684',
+    '- rank \u9898\uff1a\u628a items \u5168\u90e8\u6761\u76ee\u6309\u4f60\u7684\u504f\u597d\u4ece\u9ad8\u5230\u4f4e\u91cd\u65b0\u6392\u5e8f\u7684\u6570\u7ec4\uff0c\u6761\u76ee\u539f\u6587\u4e0d\u53d8',
+    '- toggle_group \u9898\uff1a\u5bf9\u8c61 {"\u6761\u76ee\u539f\u6587": "want"|"curious"|"meh"|"no"}\uff08\u5f88\u60f3\u8981/\u597d\u5947\u60f3\u8bd5/\u65e0\u611f/\u4e0d\u60f3\uff09\uff0c\u6bcf\u4e2a\u6761\u76ee\u90fd\u8981\u8868\u6001',
+    '- \u4e0d\u60f3\u7b54\u7684\u9898\u53ef\u4ee5\u8df3\u8fc7\u4e0d\u5199',
+    '',
+    '\u9898\u76ee\u5982\u4e0b\uff1a',
+    JSON.stringify(qs, null, 1)
+  ].join('\n');
+}
+
+function copyAIPrompt() {
+  const text = buildAIPrompt();
+  function done() { showImportResult('\u9898\u76ee\u5305\u5df2\u590d\u5236\uff0c\u53bb\u7c98\u7ed9 TA \u5427', true); }
+  function fallback() {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch(e) { showImportResult('\u590d\u5236\u5931\u8d25\uff0c\u8bf7\u624b\u52a8\u5168\u9009\u590d\u5236', false); }
+    document.body.removeChild(ta);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done, fallback);
+  } else { fallback(); }
+}
+
+function toggleImportBox() {
+  const box = document.getElementById('importBox');
+  box.style.display = box.style.display === 'none' ? 'block' : 'none';
+}
+
+function showImportResult(msg, ok) {
+  const el = document.getElementById('importResult');
+  document.getElementById('importBox').style.display = 'block';
+  el.textContent = msg;
+  el.className = 'import-result ' + (ok ? 'ok' : 'err');
+}
+
+function importAIAnswers() {
+  const raw = document.getElementById('importText').value;
+  if (!raw.trim()) { showImportResult('\u5148\u628a TA \u7684\u56de\u590d\u7c98\u8fdb\u6765', false); return; }
+  let data = null;
+  const fence = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
+  const candidates = [];
+  if (fence) candidates.push(fence[1]);
+  const braceStart = raw.indexOf('{');
+  const braceEnd = raw.lastIndexOf('}');
+  if (braceStart !== -1 && braceEnd > braceStart) candidates.push(raw.slice(braceStart, braceEnd + 1));
+  for (const c of candidates) {
+    try { data = JSON.parse(c); break; } catch(e) {}
+  }
+  if (!data) { showImportResult('\u6ca1\u89e3\u6790\u51fa\u7b54\u6848\uff0c\u786e\u8ba4\u7c98\u7684\u662f\u5426\u5305\u542b JSON \u4ee3\u7801\u5757', false); return; }
+  const answers = data.answers || data;
+  const validIds = {};
+  SECTIONS.forEach(sec => sec.questions.forEach(q => { validIds[q.id] = q; }));
+  let count = 0, skipped = 0;
+  const us = getUserState(AI);
+  for (const qid of Object.keys(answers)) {
+    const q = validIds[qid];
+    if (!q) { skipped++; continue; }
+    let val = answers[qid];
+    if (q.type === 'rating') { val = parseInt(val, 10); if (!(val >= 1 && val <= 5)) { skipped++; continue; } }
+    if (q.type === 'checkbox' && !Array.isArray(val)) { skipped++; continue; }
+    if (q.type === 'rank' && !Array.isArray(val)) { skipped++; continue; }
+    if ((q.type === 'checkbox_intensity' || q.type === 'toggle_group') && (typeof val !== 'object' || val === null || Array.isArray(val))) { skipped++; continue; }
+    if (q.type === 'text' && typeof val !== 'string') val = String(val);
+    us[qid] = val;
+    count++;
+  }
+  if (count > 0) {
+    state[AI + '_completed'] = true;
+    saveState();
+    updateLandingStatus();
+    showImportResult('\u5bfc\u5165\u6210\u529f ' + count + ' \u9898' + (skipped ? '\uff0c\u8df3\u8fc7 ' + skipped + ' \u9898' : '') + '\uff0c\u53ef\u4ee5\u770b\u5bf9\u6bd4\u548c\u62a5\u544a\u4e86', true);
+  } else {
+    showImportResult('\u4e00\u9898\u90fd\u6ca1\u5bfc\u8fdb\u6765\uff0c\u68c0\u67e5\u7b54\u6848\u683c\u5f0f\u662f\u4e0d\u662f\u6309\u9898\u76ee\u5305\u91cc\u7684\u8981\u6c42', false);
+  }
+}
+
+// ===================== RESET =====================
+function resetData() {
+  if (confirm('确定要清除所有数据吗？这个操作不可撤销。')) {
+    if (confirm('再确认一次：真的要清除吗？')) {
+      localStorage.removeItem(STORAGE_KEY);
+      state = {};
+      updateLandingStatus();
+    }
+  }
+}
+
+// ===================== INIT =====================
+applyNames();
+updateLandingStatus();
+</script>
+</body>
+</html>
+
+
+
