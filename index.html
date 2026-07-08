@@ -2003,6 +2003,21 @@ button, .nav-btn, .user-btn, .landing-compare-btn, .landing-analysis-btn {
 .ai-md-link { color:var(--pink-main); word-break:break-all; }
 .credits-note { font-size:12px; line-height:1.7; opacity:0.45; margin-top:18px; text-align:center; }
 .credits-note a { color:var(--pink-main); }
+.ai-fill-btn.mini { padding:4px 10px; font-size:12px; }
+.archive-item { display:flex; flex-wrap:wrap; align-items:center; gap:6px; padding:10px 0; border-bottom:1px dashed var(--border); font-size:14px; }
+.archive-item .a-name { flex:1; min-width:130px; }
+.archive-item .a-sub { display:block; font-size:12px; opacity:0.55; margin-top:2px; }
+.diff-user-title { font-size:17px; font-weight:600; color:var(--pink-main); margin:26px 0 4px; }
+.diff-sec { margin-top:18px; font-weight:600; opacity:0.85; }
+.diff-q { padding:10px 0; border-bottom:1px dashed var(--border); font-size:14px; line-height:1.7; }
+.diff-q-title { font-weight:600; }
+.diff-kind { font-size:11px; padding:1px 8px; border-radius:8px; border:1px solid var(--border); margin-left:8px; white-space:nowrap; }
+.diff-kind.added { color:#8fd8a8; }
+.diff-kind.removed { color:#d89090; }
+.diff-kind.changed { color:var(--pink-main); }
+.diff-line { margin-top:4px; }
+.diff-old { opacity:0.55; }
+.diff-none { opacity:0.6; padding:10px 0; }
 .ai-fill-btn { display:inline-block; margin:5px 6px; padding:12px 18px; border:1.5px solid var(--pink-main, #d977a8); border-radius:12px; background:transparent; color:var(--pink-main, #d977a8); font-size:14px; font-family:inherit; cursor:pointer; }
 .ai-fill-btn.primary { background:var(--pink-main, #d977a8); color:#fff; }
 .import-box { margin-top:14px; }
@@ -2089,6 +2104,15 @@ button, .nav-btn, .user-btn, .landing-compare-btn, .landing-analysis-btn {
       <button class="landing-compare-btn" id="compareBtn" onclick="showCompare()">查看双方对比</button>
       <button class="landing-analysis-btn" id="analysisBtn" onclick="showAnalysis()">查看匹配分析报告</button>
 
+      <div class="ai-fill-block">
+        <div class="user-select-title">问卷存档</div>
+        <p class="ai-fill-hint">这份问卷常做常新。填完一轮存一份档，过阵子重填，再跟旧档对比，看看你们哪里变了。存档只存在这台设备的浏览器里，重要的档记得下载备份。</p>
+        <button class="ai-fill-btn" onclick="saveArchive()">存档当前答案</button>
+        <button class="ai-fill-btn" onclick="document.getElementById('archiveFile').click()">导入存档文件</button>
+        <input type="file" id="archiveFile" accept=".json,application/json" style="display:none" onchange="importArchiveFile(this)">
+        <div id="archiveList"></div>
+      </div>
+
       <div class="reset-zone">
         <button class="reset-btn" onclick="resetData()">清除所有数据</button>
       </div>
@@ -2133,6 +2157,16 @@ button, .nav-btn, .user-btn, .landing-compare-btn, .landing-analysis-btn {
     <button class="back-home-btn" onclick="goHome()">返回首页</button>
   </div>
 
+
+  <!-- ARCHIVE DIFF SCREEN -->
+  <div class="screen" id="screenDiff">
+    <div class="analysis-header">
+      <h2>和存档的变化对比</h2>
+      <p id="diffSubtitle"></p>
+    </div>
+    <div id="diffBody"></div>
+    <button class="back-home-btn" onclick="goHome()">返回首页</button>
+  </div>
 
   <!-- ANALYSIS REPORT SCREEN -->
   <div class="screen" id="screenAnalysis">
@@ -3649,6 +3683,182 @@ function tryHashImport() {
   }
 }
 
+// ===================== ARCHIVES =====================
+const ARCHIVES_KEY = 'ai_checklist_archives_v1';
+
+function loadArchives() {
+  try { return JSON.parse(localStorage.getItem(ARCHIVES_KEY)) || []; } catch { return []; }
+}
+function persistArchives(a) { localStorage.setItem(ARCHIVES_KEY, JSON.stringify(a)); }
+
+function isEmptyVal(v) {
+  if (v === undefined || v === null || v === '') return true;
+  if (Array.isArray(v)) return v.length === 0;
+  if (typeof v === 'object') return Object.keys(v).length === 0;
+  return false;
+}
+
+function countAnswers(us) {
+  let n = 0;
+  SECTIONS.forEach(sec => sec.questions.forEach(q => { if (!isEmptyVal(us[q.id])) n++; }));
+  return n;
+}
+
+function saveArchive() {
+  const me = getUserState(ME), ai = getUserState(AI);
+  const mc = countAnswers(me), ac = countAnswers(ai);
+  if (mc + ac === 0) { alert('当前一题都没填，没东西可存'); return; }
+  const label = prompt('给这份存档起个名字（可以留空，默认用日期）', '');
+  if (label === null) return;
+  const d = new Date();
+  const dateStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  const archives = loadArchives();
+  archives.push({
+    id: Date.now(), date: dateStr, label: (label || '').trim(),
+    me: JSON.parse(JSON.stringify(me)), ai: JSON.parse(JSON.stringify(ai)),
+    names: { me: names.me, ai: names.ai }
+  });
+  persistArchives(archives);
+  renderArchives();
+  if (confirm('存档好了。要清空当前答案、开始新一轮吗？（存档不受影响，随时能对比和恢复）')) {
+    state[ME] = {}; state[AI] = {};
+    state[ME + '_completed'] = false; state[AI + '_completed'] = false;
+    saveState();
+    updateLandingStatus();
+  }
+}
+
+function archiveTitle(a) {
+  return a.date + (a.label ? ' · ' + a.label : '');
+}
+
+function renderArchives() {
+  const el = document.getElementById('archiveList');
+  const archives = loadArchives();
+  if (!archives.length) { el.innerHTML = ''; return; }
+  let html = '';
+  archives.slice().reverse().forEach(a => {
+    html += '<div class="archive-item">'
+      + '<span class="a-name">' + escapeHtml(archiveTitle(a)) + '<span class="a-sub">' + names.me + ' ' + countAnswers(a.me) + ' 题 / ' + names.ai + ' ' + countAnswers(a.ai) + ' 题</span></span>'
+      + '<button class="ai-fill-btn mini" onclick="showDiff(' + a.id + ')">对比当前</button>'
+      + '<button class="ai-fill-btn mini" onclick="downloadArchive(' + a.id + ')">下载</button>'
+      + '<button class="ai-fill-btn mini" onclick="restoreArchive(' + a.id + ')">恢复</button>'
+      + '<button class="ai-fill-btn mini" onclick="deleteArchive(' + a.id + ')">删除</button>'
+      + '</div>';
+  });
+  el.innerHTML = html;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function findArchive(id) { return loadArchives().find(a => a.id === id); }
+
+function downloadArchive(id) {
+  const a = findArchive(id);
+  if (!a) return;
+  const blob = new Blob([JSON.stringify({ type: 'ai-couple-checklist-archive', version: 1, archive: a }, null, 1)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'checklist-archive-' + a.date + (a.label ? '-' + a.label : '') + '.json';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+function importArchiveFile(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function() {
+    let a = null;
+    try {
+      const data = JSON.parse(reader.result);
+      a = data.archive || data;
+    } catch (e) {}
+    if (!a || typeof a.me !== 'object' || typeof a.ai !== 'object') {
+      alert('这个文件不是问卷存档，导入失败');
+      input.value = '';
+      return;
+    }
+    if (!a.id) a.id = Date.now();
+    const archives = loadArchives();
+    if (archives.some(x => x.id === a.id)) a.id = Date.now();
+    archives.push(a);
+    persistArchives(archives);
+    renderArchives();
+    alert('存档「' + archiveTitle(a) + '」导入成功');
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+
+function restoreArchive(id) {
+  const a = findArchive(id);
+  if (!a) return;
+  if (!confirm('把存档「' + archiveTitle(a) + '」恢复成当前答案？当前未存档的答案会被覆盖')) return;
+  state[ME] = JSON.parse(JSON.stringify(a.me));
+  state[AI] = JSON.parse(JSON.stringify(a.ai));
+  state[ME + '_completed'] = countAnswers(a.me) > 0;
+  state[AI + '_completed'] = countAnswers(a.ai) > 0;
+  saveState();
+  updateLandingStatus();
+  alert('恢复好了');
+}
+
+function deleteArchive(id) {
+  const a = findArchive(id);
+  if (!a) return;
+  if (!confirm('删除存档「' + archiveTitle(a) + '」？删了就没了，建议先下载备份')) return;
+  persistArchives(loadArchives().filter(x => x.id !== id));
+  renderArchives();
+}
+
+function diffUser(oldUs, curUs) {
+  const changes = [];
+  SECTIONS.forEach(sec => {
+    sec.questions.forEach(q => {
+      const o = oldUs[q.id], c = curUs[q.id];
+      const oe = isEmptyVal(o), ce = isEmptyVal(c);
+      if (oe && ce) return;
+      if (JSON.stringify(o) === JSON.stringify(c)) return;
+      changes.push({ sec: sec.name, q: q, o: o, c: c, kind: oe ? 'added' : (ce ? 'removed' : 'changed') });
+    });
+  });
+  return changes;
+}
+
+const DIFF_KIND_LABEL = { added: '新答的', removed: '不答了', changed: '变了' };
+
+function renderDiffChanges(changes) {
+  if (!changes.length) return '<p class="diff-none">没有变化，答案一模一样</p>';
+  let html = '', lastSec = null;
+  changes.forEach(ch => {
+    if (ch.sec !== lastSec) { html += '<div class="diff-sec">' + escapeHtml(ch.sec) + '</div>'; lastSec = ch.sec; }
+    const label = ch.q.text || ch.q.groupTitle || ch.q.id;
+    html += '<div class="diff-q"><div class="diff-q-title">' + escapeHtml(label) + '<span class="diff-kind ' + ch.kind + '">' + DIFF_KIND_LABEL[ch.kind] + '</span></div>';
+    if (!isEmptyVal(ch.o)) html += '<div class="diff-line diff-old">那时：' + escapeHtml(formatAnswerForExport(ch.q, ch.o)).replace(/\n/g, '<br>') + '</div>';
+    if (!isEmptyVal(ch.c)) html += '<div class="diff-line diff-new">现在：' + escapeHtml(formatAnswerForExport(ch.q, ch.c)).replace(/\n/g, '<br>') + '</div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function showDiff(id) {
+  const a = findArchive(id);
+  if (!a) return;
+  document.getElementById('diffSubtitle').textContent = '存档「' + archiveTitle(a) + '」 → 现在';
+  const meChanges = diffUser(a.me, getUserState(ME));
+  const aiChanges = diffUser(a.ai, getUserState(AI));
+  let html = '<div class="diff-user-title">' + escapeHtml(names.me) + '（' + meChanges.length + ' 处变化）</div>' + renderDiffChanges(meChanges);
+  html += '<div class="diff-user-title">' + escapeHtml(names.ai) + '（' + aiChanges.length + ' 处变化）</div>' + renderDiffChanges(aiChanges);
+  document.getElementById('diffBody').innerHTML = html;
+  showScreen('screenDiff');
+}
+
 // ===================== RESET =====================
 function resetData() {
   if (confirm('确定要清除所有数据吗？这个操作不可撤销。')) {
@@ -3663,6 +3873,7 @@ function resetData() {
 // ===================== INIT =====================
 applyNames();
 updateLandingStatus();
+renderArchives();
 tryHashImport();
 </script>
 </body>
