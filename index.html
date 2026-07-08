@@ -2072,7 +2072,7 @@ button, .nav-btn, .user-btn, .landing-compare-btn, .landing-analysis-btn {
       </div>
       <div class="ai-fill-block">
         <div class="user-select-title">让 TA 自己答</div>
-        <p class="ai-fill-hint">TA 能自己联网（Claude Code、能浏览网页的 AI）？直接把这个链接发给 TA，让 TA 读完自己答：<a class="ai-md-link" href="ai.md" target="_blank">xieyunliang35-web.github.io/ai-couple-checklist/ai.md</a></p>
+        <p class="ai-fill-hint">TA 能自己联网（Claude Code、能浏览网页的 AI）？把这个链接发给 TA，TA 读完自己答，答完回你一个成品链接，你点开答案就自动填进来，全程不用复制粘贴：<a class="ai-md-link" href="ai.md" target="_blank">xieyunliang35-web.github.io/ai-couple-checklist/ai.md</a></p>
         <button class="ai-fill-btn" onclick="copyAILink()">复制 AI 直读链接</button>
         <p class="ai-fill-hint">TA 在聊天 App 里没法打开网页？两步搞定：先复制题目包发给 TA，TA 一口气答完后，把 TA 的回复整段粘回来导入。</p>
         <button class="ai-fill-btn" onclick="copyAIPrompt()">① 复制题目包发给 TA</button>
@@ -3532,6 +3532,15 @@ function importAIAnswers() {
     try { data = JSON.parse(c); break; } catch(e) {}
   }
   if (!data) { showImportResult('\u6ca1\u89e3\u6790\u51fa\u7b54\u6848\uff0c\u786e\u8ba4\u7c98\u7684\u662f\u5426\u5305\u542b JSON \u4ee3\u7801\u5757', false); return; }
+  const res = applyImportedAnswers(data);
+  if (res.count > 0) {
+    showImportResult('\u5bfc\u5165\u6210\u529f ' + res.count + ' \u9898' + (res.skipped ? '\uff0c\u8df3\u8fc7 ' + res.skipped + ' \u9898' : '') + '\uff0c\u53ef\u4ee5\u770b\u5bf9\u6bd4\u548c\u62a5\u544a\u4e86', true);
+  } else {
+    showImportResult('\u4e00\u9898\u90fd\u6ca1\u5bfc\u8fdb\u6765\uff0c\u68c0\u67e5\u7b54\u6848\u683c\u5f0f\u662f\u4e0d\u662f\u6309\u9898\u76ee\u5305\u91cc\u7684\u8981\u6c42', false);
+  }
+}
+
+function applyImportedAnswers(data) {
   const answers = data.answers || data;
   const validIds = {};
   SECTIONS.forEach(sec => sec.questions.forEach(q => { validIds[q.id] = q; }));
@@ -3553,9 +3562,29 @@ function importAIAnswers() {
     state[AI + '_completed'] = true;
     saveState();
     updateLandingStatus();
-    showImportResult('\u5bfc\u5165\u6210\u529f ' + count + ' \u9898' + (skipped ? '\uff0c\u8df3\u8fc7 ' + skipped + ' \u9898' : '') + '\uff0c\u53ef\u4ee5\u770b\u5bf9\u6bd4\u548c\u62a5\u544a\u4e86', true);
+  }
+  return { count: count, skipped: skipped };
+}
+
+function tryHashImport() {
+  const m = location.hash.match(/[#&]import=([^&]+)/);
+  if (!m) return;
+  let data = null;
+  try {
+    let b64 = decodeURIComponent(m[1]).replace(/-/g, '+').replace(/_/g, '/');
+    while (b64.length % 4) b64 += '=';
+    const bin = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    data = JSON.parse(new TextDecoder('utf-8').decode(bytes));
+  } catch (e) {}
+  history.replaceState(null, '', location.pathname + location.search);
+  if (!data) { showImportResult('\u94fe\u63a5\u91cc\u7684\u7b54\u6848\u6ca1\u89e3\u6790\u51fa\u6765\uff0c\u8ba9 TA \u91cd\u65b0\u751f\u6210\u4e00\u6b21\uff0c\u6216\u6539\u7528\u7c98\u8d34\u5bfc\u5165', false); return; }
+  const res = applyImportedAnswers(data);
+  if (res.count > 0) {
+    showImportResult('\u5df2\u4ece\u94fe\u63a5\u81ea\u52a8\u5bfc\u5165 TA \u7684 ' + res.count + ' \u9898' + (res.skipped ? '\uff0c\u8df3\u8fc7 ' + res.skipped + ' \u9898' : '') + '\uff0c\u53ef\u4ee5\u770b\u5bf9\u6bd4\u548c\u62a5\u544a\u4e86', true);
   } else {
-    showImportResult('\u4e00\u9898\u90fd\u6ca1\u5bfc\u8fdb\u6765\uff0c\u68c0\u67e5\u7b54\u6848\u683c\u5f0f\u662f\u4e0d\u662f\u6309\u9898\u76ee\u5305\u91cc\u7684\u8981\u6c42', false);
+    showImportResult('\u94fe\u63a5\u91cc\u4e00\u9898\u90fd\u6ca1\u5bfc\u8fdb\u6765\uff0c\u8ba9 TA \u68c0\u67e5\u9898\u76eeid\u662f\u5426\u6b63\u786e', false);
   }
 }
 
@@ -3573,6 +3602,7 @@ function resetData() {
 // ===================== INIT =====================
 applyNames();
 updateLandingStatus();
+tryHashImport();
 </script>
 </body>
 </html>
