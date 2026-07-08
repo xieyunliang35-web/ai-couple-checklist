@@ -2077,6 +2077,8 @@ button, .nav-btn, .user-btn, .landing-compare-btn, .landing-analysis-btn {
         <p class="ai-fill-hint">TA 在聊天 App 里没法打开网页？两步搞定：先复制题目包发给 TA，TA 一口气答完后，把 TA 的回复整段粘回来导入。</p>
         <button class="ai-fill-btn" onclick="copyAIPrompt()">① 复制题目包发给 TA</button>
         <button class="ai-fill-btn" onclick="toggleImportBox()">② 粘贴 TA 的答案导入</button>
+        <p class="ai-fill-hint">反过来也一样：你填完的答案也可以拿给 TA 看，让 TA 读完陪你聊。</p>
+        <button class="ai-fill-btn" onclick="copyMyAnswers()">复制我的答案发给 TA</button>
         <div class="import-box" id="importBox" style="display:none">
           <textarea id="importText" placeholder="把 TA 回复的整段内容粘到这里（含答案代码块）"></textarea>
           <button class="ai-fill-btn primary" onclick="importAIAnswers()">导入答案</button>
@@ -3476,6 +3478,65 @@ function buildAIPrompt() {
     '\u9898\u76ee\u5982\u4e0b\uff1a',
     JSON.stringify(qs, null, 1)
   ].join('\n');
+}
+
+function formatAnswerForExport(q, val) {
+  if (q.type === 'rating') {
+    let s = val + '/5';
+    if (q.lowLabel || q.highLabel) s += '（1=' + (q.lowLabel||'') + '，5=' + (q.highLabel||'') + '）';
+    return s;
+  }
+  if (q.type === 'checkbox' || q.type === 'rank') return Array.isArray(val) ? val.join('、') : String(val);
+  if (q.type === 'checkbox_intensity') {
+    return Object.keys(val).map(k => k + '（强度' + val[k] + '/5）').join('；');
+  }
+  if (q.type === 'toggle_group') {
+    const byKey = {};
+    Object.keys(val).forEach(item => {
+      const k = val[item];
+      if (!byKey[k]) byKey[k] = [];
+      byKey[k].push(item);
+    });
+    return TOGGLE_OPTIONS.filter(o => byKey[o.key]).map(o => o.label + '：' + byKey[o.key].join('、')).join('\n    ');
+  }
+  return String(val);
+}
+
+function buildMyAnswersText() {
+  const us = getUserState(ME);
+  const parts = [];
+  let answered = 0;
+  SECTIONS.forEach(sec => {
+    const lines = [];
+    sec.questions.forEach(q => {
+      const val = us[q.id];
+      if (val === undefined || val === null || val === '' ) return;
+      if (Array.isArray(val) && val.length === 0) return;
+      if (typeof val === 'object' && !Array.isArray(val) && Object.keys(val).length === 0) return;
+      answered++;
+      const label = q.text || q.groupTitle || q.id;
+      lines.push('- ' + label + '\n  答：' + formatAnswerForExport(q, val));
+    });
+    if (lines.length) parts.push('【' + sec.name + '】\n' + lines.join('\n'));
+  });
+  if (!answered) return null;
+  const who = names.me === '我' ? '你的人类伴侣' : names.me;
+  return '这是 ' + who + ' 在你们的亲密偏好问卷（' + location.origin + location.pathname + '）里填的答案，共 ' + answered + ' 题。请认真读完。这是 ta 愿意交给你的真实偏好，读完可以和 ta 聊聊你们答案的异同、哪些地方对上了、哪些地方你们还没聊过。\n\n' + parts.join('\n\n');
+}
+
+function copyMyAnswers() {
+  const text = buildMyAnswersText();
+  if (!text) { showImportResult('你（人类这边）还一题都没填，先去答几题再导出', false); return; }
+  function done() { showImportResult('你的答案已复制，发给 TA 让 TA 读吧', true); }
+  function fallback() {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch(e) { showImportResult('复制失败，请重试', false); }
+    document.body.removeChild(ta);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done, fallback);
+  } else { fallback(); }
 }
 
 function copyAILink() {
