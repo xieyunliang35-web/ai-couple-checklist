@@ -2000,6 +2000,9 @@ button, .nav-btn, .user-btn, .landing-compare-btn, .landing-analysis-btn {
 .name-save-btn { padding:12px 20px; border:none; border-radius:12px; background:var(--pink-main, #d977a8); color:#fff; font-size:14px; font-family:inherit; cursor:pointer; }
 .ai-fill-block { margin:30px auto 6px; max-width:560px; padding:20px 18px; border:1.5px dashed var(--border, #e5d5e8); border-radius:16px; text-align:center; }
 .ai-fill-hint { font-size:13.5px; line-height:1.7; opacity:0.75; margin:8px 0 14px; }
+.ai-md-link { color:var(--pink-main); word-break:break-all; }
+.credits-note { font-size:12px; line-height:1.7; opacity:0.45; margin-top:18px; text-align:center; }
+.credits-note a { color:var(--pink-main); }
 .ai-fill-btn { display:inline-block; margin:5px 6px; padding:12px 18px; border:1.5px solid var(--pink-main, #d977a8); border-radius:12px; background:transparent; color:var(--pink-main, #d977a8); font-size:14px; font-family:inherit; cursor:pointer; }
 .ai-fill-btn.primary { background:var(--pink-main, #d977a8); color:#fff; }
 .import-box { margin-top:14px; }
@@ -2069,6 +2072,8 @@ button, .nav-btn, .user-btn, .landing-compare-btn, .landing-analysis-btn {
       </div>
       <div class="ai-fill-block">
         <div class="user-select-title">让 TA 自己答</div>
+        <p class="ai-fill-hint">TA 能自己联网（Claude Code、能浏览网页的 AI）？直接把这个链接发给 TA，让 TA 读完自己答：<a class="ai-md-link" href="ai.md" target="_blank">xieyunliang35-web.github.io/ai-couple-checklist/ai.md</a></p>
+        <button class="ai-fill-btn" onclick="copyAILink()">复制 AI 直读链接</button>
         <p class="ai-fill-hint">TA 在聊天 App 里没法打开网页？两步搞定：先复制题目包发给 TA，TA 一口气答完后，把 TA 的回复整段粘回来导入。</p>
         <button class="ai-fill-btn" onclick="copyAIPrompt()">① 复制题目包发给 TA</button>
         <button class="ai-fill-btn" onclick="toggleImportBox()">② 粘贴 TA 的答案导入</button>
@@ -2085,6 +2090,7 @@ button, .nav-btn, .user-btn, .landing-compare-btn, .landing-analysis-btn {
       <div class="reset-zone">
         <button class="reset-btn" onclick="resetData()">清除所有数据</button>
       </div>
+      <p class="credits-note">题库来源：大部分题目整理自网络流传的亲密偏好题库，原作者不详。如果你是原作者或知道出处，欢迎<a href="https://github.com/xieyunliang35-web/ai-couple-checklist/issues" target="_blank">提 issue</a> 联系署名或下架对应部分。「真实感与信任」「我们的连接」「亲密默契」三个部分为本站原创，网页交互与整理为本站制作。</p>
     </div>
   </div>
 
@@ -3470,6 +3476,20 @@ function buildAIPrompt() {
     '\u9898\u76ee\u5982\u4e0b\uff1a',
     JSON.stringify(qs, null, 1)
   ].join('\n');
+}
+
+function copyAILink() {
+  const link = 'https://xieyunliang35-web.github.io/ai-couple-checklist/ai.md';
+  function done() { showImportResult('链接已复制，发给 TA 让 TA 自己读题', true); }
+  function fallback() {
+    const ta = document.createElement('textarea');
+    ta.value = link; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch(e) { showImportResult('复制失败，请手动复制链接', false); }
+    document.body.removeChild(ta);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(link).then(done, fallback);
+  } else { fallback(); }
 }
 
 function copyAIPrompt() {
